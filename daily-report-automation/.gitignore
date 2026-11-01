@@ -1,0 +1,17 @@
+# clasp config lokal (berisi scriptId milik masing-masing environment)
+.clasp.json
+
+# Kredensial clasp
+.clasprc.json
+
+# Jaga-jaga: jangan pernah commit secret
+.env
+*.env
+secrets.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
