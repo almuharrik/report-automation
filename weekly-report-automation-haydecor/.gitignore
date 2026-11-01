@@ -1,0 +1,24 @@
+# clasp credentials & local project binding
+.clasprc.json
+.clasp.json
+
+# secrets (never commit tokens, API keys, or Script Properties dumps)
+.env
+.env.*
+*.key
+secrets.*
+credentials*.json
+
+# node / tooling
+node_modules/
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# logs & exports
+*.log
+*.zip
