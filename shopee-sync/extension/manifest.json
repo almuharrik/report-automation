@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Shopee Ads → Sheet Sync",
+  "version": "2.0.0",
+  "minimum_chrome_version": "111",
+  "description": "Menangkap data Iklan Shopee, Performa Toko, dan Off-platform dari Seller Centre lalu mengirimnya ke Google Spreadsheet via Apps Script.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://seller.shopee.co.id/*",
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Shopee Ads Sync"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://seller.shopee.co.id/*"
+      ],
+      "js": [
+        "injected.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://seller.shopee.co.id/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# --- Data sensitif: JANGAN PERNAH di-commit ---
+# File HAR berisi cookie/token sesi Seller Centre dan identitas toko.
+*.har
+*.har.json
+# Ekspor data klien (omzet, biaya iklan).
+*.csv
+*.tsv
+*.xlsx
+*.xls
+# Catatan pribadi, URL /exec, kredensial.
+secrets/
+*.secret
+*.env
+.env*
+# clasp: .clasprc.json berisi token OAuth Google.
+.clasprc.json
+
+# --- Build & OS ---
+*.zip
+*.crx
+*.pem
+node_modules/
+.DS_Store
+Thumbs.db

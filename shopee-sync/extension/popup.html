@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Shopee Ads Sync</title>
+<style>
+  /* Mengikuti gaya Seller Centre: latar abu muda, kartu putih, oranye untuk aksi utama */
+  :root {
+    --orange: #EE4D2D; --orange-hover: #D73211; --orange-soft: #FFF1EE;
+    --text: #333333; --text-2: #666666; --text-3: #999999;
+    --line: #E5E5E5; --bg: #F6F6F6; --card: #FFFFFF; --row-hover: #FAFAFA;
+    --link: #2673DD; --green: #26AA99; --green-soft: #E8F7F5;
+    --amber: #F69113; --amber-soft: #FFF4E5; --gray-soft: #F2F2F2;
+    --radius: 4px; --shadow: 0 1px 4px rgba(0, 0, 0, .08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 460px; background: var(--bg); color: var(--text);
+    font: 13px/1.45 Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .wrap { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .hidden { display: none !important; }
+
+  /* Header seperti judul halaman "Iklan Shopee" */
+  header { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  header h1 { margin: 0; font-size: 17px; font-weight: 500; color: #222; }
+  header .sep { width: 1px; height: 18px; background: var(--line); }
+  .link { border: 0; background: none; padding: 0; font: inherit; color: var(--link); cursor: pointer; }
+  .link:hover { text-decoration: underline; }
+  .link:focus-visible, .btn:focus-visible, input:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  header .link { margin-left: auto; }
+
+  /* Pill status koneksi, gaya "Proteksi ROAS" */
+  .pill { display: inline-flex; align-items: center; gap: 5px; background: var(--bg); border-radius: 2px; padding: 3px 8px; font-size: 12px; color: var(--text); white-space: nowrap; }
+  .pill::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--text-3); flex: none; }
+  .pill.ok::before { background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.2 6.2l1.8 1.8 3.8-3.8' fill='none' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E") center/12px no-repeat; }
+  .pill.err::before { background: var(--orange) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M6 3v3.6M6 8.4v.2' stroke='white' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center/12px no-repeat; }
+  .pill.err { color: var(--orange); }
+
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; }
+  .card-title { display: flex; align-items: center; margin: 0 0 10px; }
+  .card-title h2 { margin: 0; font-size: 15px; font-weight: 500; color: #222; }
+  .card-title .actions { margin-left: auto; display: flex; gap: 14px; font-size: 12px; }
+  .muted { color: var(--text-2); } .small { font-size: 12px; }
+
+  .btn { border: 1px solid var(--line); background: #fff; color: var(--text); border-radius: 2px; padding: 5px 14px; font: inherit; cursor: pointer; }
+  .btn:hover { background: var(--row-hover); }
+  .btn:disabled { color: var(--text-3); background: var(--gray-soft); cursor: not-allowed; }
+  .btn.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .btn.primary:hover:not(:disabled) { background: var(--orange-hover); border-color: var(--orange-hover); }
+  .btn.primary:disabled { background: #F7B7A8; border-color: #F7B7A8; color: #fff; }
+
+  /* Setelan link */
+  .settings label { display: block; color: var(--text-2); margin-bottom: 6px; }
+  .settings input { width: 100%; border: 1px solid var(--line); border-radius: 2px; padding: 7px 9px; font: inherit; color: var(--text); }
+  .settings input:hover { border-color: #BBB; }
+  .settings input:focus { outline: none; border-color: var(--text-3); }
+  .settings .row { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .settings .hint { margin: 8px 0 0; color: var(--text-3); font-size: 12px; }
+
+  /* Ringkasan status, gaya tag Shopee */
+  .bar { display: flex; gap: 6px; margin-bottom: 10px; }
+  .chip { display: inline-block; border-radius: 2px; padding: 2px 8px; font-size: 12px; white-space: nowrap; }
+  .chip.new { background: var(--green-soft); color: var(--green); }
+  .chip.changed { background: var(--amber-soft); color: var(--amber); }
+  .chip.same { background: var(--gray-soft); color: var(--text-2); }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 2px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th { background: #FAFAFA; color: var(--text-2); font-weight: 400; padding: 8px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  td { padding: 8px 6px; text-align: right; white-space: nowrap; vertical-align: top; border-bottom: 1px solid var(--line); }
+  tbody tr:hover td { background: var(--row-hover); }
+  th:first-child, td:first-child { text-align: left; }
+  tr td:first-child { border-left: 3px solid transparent; }
+  tr.new td:first-child { border-left-color: var(--green); }
+  tr.changed td:first-child { border-left-color: var(--amber); }
+  tr.same td:first-child { border-left-color: #CCC; }
+  tr.same td { color: var(--text-3); }
+  td b { font-weight: 500; }
+  td .type { display: block; font-size: 11px; color: var(--text-3); }
+  td s { display: block; font-size: 11px; color: var(--text-3); }
+  tfoot td { font-weight: 500; background: #FAFAFA; border-bottom: 0; }
+  .note:empty { display: none; }
+
+  /* Satu blok per dataset */
+  .ds { border: 1px solid var(--line); border-radius: 2px; margin-top: 8px; }
+  .ds > summary { list-style: none; cursor: pointer; padding: 9px 10px; display: flex; align-items: center; gap: 8px; }
+  .ds > summary::-webkit-details-marker { display: none; }
+  .ds > summary::before { content: ""; width: 0; height: 0; border: 4px solid transparent; border-left: 5px solid var(--text-3); margin-right: -2px; flex: none; }
+  .ds[open] > summary::before { transform: rotate(90deg); transform-origin: 2px 4px; }
+  .ds > summary:hover { background: var(--row-hover); }
+  .ds > summary:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+  .ds .name { font-weight: 500; color: #222; white-space: nowrap; }
+  .ds .meta { color: var(--text-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .ds .mini { margin-left: auto; display: flex; gap: 4px; }
+  .ds .body { padding: 0 10px 10px; }
+  .ds table { font-size: 11.5px; }
+  .ds th, .ds td { padding: 7px 5px; }
+  .ds .table-wrap { border: 0; border-top: 1px solid var(--line); border-radius: 0; margin: 0 -10px; }
+  .warn { margin: 0 10px 8px; padding: 6px 8px; border-radius: 2px; background: var(--amber-soft); color: #A35F00; font-size: 12px; }
+  .ds .table-wrap + .note { margin-top: 6px; }
+  .tag { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 2px; background: var(--amber-soft); color: #A35F00; font-size: 10px; font-weight: 400; vertical-align: 1px; }
+
+  /* Langkah saat kosong */
+  .empty { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .empty li { counter-increment: s; display: flex; gap: 8px; align-items: baseline; padding: 3px 0; color: var(--text-2); }
+  .empty li::before { content: counter(s); flex: none; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--orange-soft); color: var(--orange); font-size: 11px; font-weight: 500; }
+
+  /* Tombol Kirim, gaya "Isi Saldo"; tetap terlihat karena popup maks. 600px */
+  .sendbar { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -8px 0 var(--bg), var(--shadow); }
+  #sendBtn { width: 100%; padding: 9px; font-size: 14px; font-weight: 500; }
+  .status { margin-top: 8px; border-radius: 2px; padding: 7px 10px; font-size: 12px; display: none; }
+  .status.show { display: block; }
+  .status.ok { background: var(--green-soft); color: #18806F; }
+  .status.err { background: var(--orange-soft); color: var(--orange-hover); }
+  .status.info { background: var(--bg); color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Shopee Ads Sync</h1>
+    <span class="sep"></span>
+    <span id="connChip" class="pill">Belum disambungkan</span>
+    <button class="link" id="gearBtn">Ubah link</button>
+  </header>
+
+  <section id="settings" class="card settings">
+    <label for="url">Link Web app Apps Script</label>
+    <input type="text" id="url" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false">
+    <div class="row">
+      <button class="btn primary" id="saveBtn">Simpan</button>
+      <button class="btn" id="testBtn">Tes koneksi</button>
+    </div>
+    <p class="hint">Di Apps Script: Deploy, Manage deployments, lalu salin link yang berakhiran /exec.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-title">
+      <h2>Data tertangkap</h2>
+      <div class="actions" id="actions">
+        <button class="link" id="recheckBtn">Cek ulang</button>
+        <button class="link" id="clearBtn">Kosongkan</button>
+      </div>
+    </div>
+    <div class="bar" id="bar">
+      <span class="chip new" id="nNew">0 baru</span>
+      <span class="chip changed" id="nChanged">0 berubah</span>
+      <span class="chip same" id="nSame">0 sama</span>
+    </div>
+
+    <ol id="empty" class="empty">
+      <li>Buka salah satu halaman di Seller Centre lalu tekan F5: Iklan Shopee, Performa Toko, atau Laporan Pengunjung dari Platform Eksternal.</li>
+      <li>Pilih tanggal. Hari ini tidak diambil karena belum final.</li>
+      <li>Iklan Shopee: klik tab Iklan Produk lalu Iklan Toko+. Off-platform: biarkan filter di Semua Platform dan Semua Channel.</li>
+    </ol>
+
+    <div id="datasets"></div>
+    <p id="checkNote" class="muted small note" style="margin:8px 0 0"></p>
+  </section>
+
+  <section class="card sendbar">
+    <button class="btn primary" id="sendBtn" disabled>Kirim</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </section>
+</div>
+<script src="datasets.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

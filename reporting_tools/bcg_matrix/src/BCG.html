@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCG Matrix Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --k1:#059669;--k1b:#d1fae5;--k1d:#065f46;
+  --k2:#2563eb;--k2b:#dbeafe;--k2d:#1e40af;
+  --k3:#d97706;--k3b:#fef3c7;--k3d:#92400e;
+  --k4:#6b7280;--k4b:#f3f4f6;--k4d:#374151;
+  --bg:#f8f9fb;--card:#ffffff;--border:#e5e7eb;
+  --border2:#f0f0f0;--dark:#111827;--mid:#374151;
+  --muted:#9ca3af;--accent:#7c3aed;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--dark);min-height:100vh;font-size:14px}
+
+/* ── LOADING SCREEN ── */
+#loadScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:1rem}
+.ld-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-text{font-size:13px;color:var(--muted)}
+
+/* ── ERROR SCREEN ── */
+#errScreen{display:none;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.err-box{background:var(--card);border-radius:14px;padding:2.5rem;max-width:500px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.07);text-align:center}
+.err-icon{font-size:40px;margin-bottom:1rem}
+.err-title{font-size:18px;font-weight:700;color:var(--dark);margin-bottom:.5rem}
+.err-msg{font-size:13px;color:var(--muted);line-height:1.6;background:var(--bg);border-radius:8px;padding:.75rem 1rem;margin-top:1rem;text-align:left;font-family:var(--mono)}
+.retry-btn{margin-top:1.5rem;padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:var(--dark);color:#fff;cursor:pointer;font-family:var(--font);font-size:13px}
+
+/* ── DASHBOARD ── */
+#dashScreen{display:none}
+header{background:var(--dark);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.h-left{display:flex;align-items:center;gap:10px}
+.h-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.h-title{font-size:14px;font-weight:600;color:#fff;letter-spacing:.02em}
+.h-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.h-badge{font-family:var(--mono);font-size:11px;color:#9ca3af;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:3px 9px;border-radius:4px}
+.h-time{font-size:11px;color:#6b7280;font-family:var(--mono)}
+.refresh-btn{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:transparent;cursor:pointer;color:#9ca3af;transition:all .12s;font-family:var(--font)}
+.refresh-btn:hover{border-color:rgba(255,255,255,.3);color:#fff}
+.refresh-btn:disabled{opacity:.4;cursor:default}
+
+.main{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 54px)}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--card);border-right:1px solid var(--border);overflow-y:auto;padding:18px 0}
+.sb-section{padding:0 16px 16px}
+.sb-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.q-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;background:transparent;margin-bottom:5px;transition:all .12s;text-align:left;font-family:var(--font)}
+.q-btn:hover{background:var(--bg)}
+.q-btn.active{border-color:currentColor}
+.qb-all{color:var(--mid)}.qb-all.active{background:var(--bg);border-color:var(--mid)}
+.qb-1{color:var(--k1)}.qb-1.active{background:var(--k1b)}
+.qb-2{color:var(--k2)}.qb-2.active{background:var(--k2b)}
+.qb-3{color:var(--k3)}.qb-3.active{background:var(--k3b)}
+.qb-4{color:var(--k4)}.qb-4.active{background:var(--k4b)}
+.qb-icon{font-size:15px;flex-shrink:0}
+.qb-info{flex:1;min-width:0}
+.qb-name{font-size:12px;font-weight:600}
+.qb-desc{font-size:10px;opacity:.7;margin-top:1px}
+.qb-count{font-family:var(--mono);font-size:11px;font-weight:500;background:rgba(0,0,0,.05);padding:2px 6px;border-radius:3px}
+.sb-divider{height:1px;background:var(--border2);margin:4px 16px 16px}
+.cat-sel{width:100%;font-size:12px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;font-family:var(--font);color:var(--mid);background:var(--bg);cursor:pointer;outline:none}
+.sort-row{display:flex;gap:5px;flex-wrap:wrap}
+.sort-btn{font-size:11px;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--mid);transition:all .12s;font-family:var(--font)}
+.sort-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.sb-kpi-block{padding:14px 16px;border-top:1px solid var(--border2);background:var(--bg)}
+.sb-kpi-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sb-kpi-item{margin-bottom:10px}
+.sb-kpi-val{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--dark)}
+.sb-kpi-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.sb-insight{font-size:11px;color:var(--mid);line-height:1.55;padding:8px 10px;border-radius:6px;border-left:3px solid var(--k2);background:var(--k2b);margin-top:8px}
+
+/* ── CONTENT ── */
+.content{overflow-y:auto;display:flex;flex-direction:column}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);background:var(--card)}
+.kpi-cell{padding:12px 16px;border-right:1px solid var(--border);cursor:pointer;transition:background .1s}
+.kpi-cell:last-child{border-right:none}
+.kpi-cell:hover{background:var(--bg)}
+.kpi-cell.k1{border-top:2.5px solid var(--k1)}.kpi-cell.k2{border-top:2.5px solid var(--k2)}.kpi-cell.k3{border-top:2.5px solid var(--k3)}.kpi-cell.k4{border-top:2.5px solid var(--k4)}
+.kc-label{font-size:10px;color:var(--muted);font-weight:500;margin-bottom:2px}
+.kc-val{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--dark)}
+.kc-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.kc-sub4{display:flex;gap:0;margin-top:6px;border-top:1px solid var(--border2);padding-top:5px}
+.kc-sub4-item{flex:1;min-width:0;padding-right:8px}
+.kc-sub4-item:last-child{padding-right:0}
+.kc-sub4-val{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--dark);white-space:nowrap}
+.kc-sub4-lbl{font-size:9px;color:var(--muted);margin-top:1px;white-space:nowrap}
+
+.inner{flex:1;padding:18px 22px}
+.tab-bar{display:flex;gap:4px;margin-bottom:16px}
+.tab{font-size:12px;font-weight:500;padding:6px 13px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--muted);transition:all .12s;font-family:var(--font)}
+.tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+/* TABLE */
+.tbl-wrap{border-radius:10px;border:1px solid var(--border);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--dark);color:#fff;padding:9px 13px;font-weight:500;font-size:11px;text-align:left;cursor:pointer;white-space:nowrap;user-select:none;font-family:var(--font);letter-spacing:.02em}
+thead th:hover{background:#1f2937}
+tbody tr{border-bottom:1px solid var(--border);transition:background .08s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f8faff}
+tbody td{padding:8px 13px;vertical-align:middle}
+.nm-link{color:var(--dark);text-decoration:underline;text-underline-offset:2px;font-weight:500;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:210px}
+.nm-plain{font-weight:500;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:210px}
+.nm-cat{font-size:10px;color:var(--muted);margin-top:2px}
+.chip{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap;letter-spacing:.01em}
+.c1{background:var(--k1b);color:var(--k1d)}.c2{background:var(--k2b);color:var(--k2d)}.c3{background:var(--k3b);color:var(--k3d)}.c4{background:var(--k4b);color:var(--k4d)}
+.cr-ok{background:var(--k1b);color:var(--k1d);font-size:11px;padding:1px 5px;border-radius:3px;font-family:var(--mono)}
+.cr-bad{background:var(--k3b);color:var(--k3d);font-size:11px;padding:1px 5px;border-radius:3px;font-family:var(--mono)}
+.mono{font-family:var(--mono);font-size:11px}
+.bar-bg{height:4px;border-radius:2px;background:var(--border2);margin-top:3px;min-width:60px}
+.bar-fg{height:100%;border-radius:2px}
+.action-chip{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:500;white-space:nowrap}
+.count-info{font-size:11px;color:var(--muted);margin-bottom:10px}
+.count-info strong{color:var(--dark)}
+.pg-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:12px}
+.pg-btn{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;color:var(--mid);font-family:var(--font)}
+.pg-btn:disabled{opacity:.3;cursor:default}
+.pg-btn:hover:not(:disabled){border-color:var(--mid)}
+.pg-info{font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+/* MATRIX */
+.mx-outer{display:grid;grid-template-columns:24px 1fr;gap:0;align-items:center}
+.mx-yaxis{writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+.mx-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:var(--border);border-radius:10px;overflow:hidden;min-height:420px}
+.mq{padding:14px;position:relative;background:var(--card)}
+.mq-k1{background:#f0fdf8}.mq-k2{background:#eff6ff}.mq-k3{background:#fffbeb}.mq-k4{background:var(--bg)}
+.mq-head{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.mq-lbl{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.mq-k1 .mq-lbl{color:var(--k1)}.mq-k2 .mq-lbl{color:var(--k2)}.mq-k3 .mq-lbl{color:var(--k3)}.mq-k4 .mq-lbl{color:var(--k4)}
+.mq-cnt{font-size:10px;color:var(--muted);font-family:var(--mono);margin-left:auto}
+.dot-area{position:relative;height:calc(100% - 36px);min-height:100px}
+.dot{position:absolute;border-radius:50%;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.dot:hover{transform:scale(1.5)!important;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:10}
+.mx-tooltip{position:absolute;background:var(--dark);color:#fff;padding:10px 12px;border-radius:8px;font-size:11px;pointer-events:none;z-index:99;display:none;min-width:170px;max-width:230px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.mtt-name{font-weight:500;margin-bottom:5px;white-space:normal;line-height:1.4;font-size:11.5px}
+.mtt-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:2px;font-size:10px}
+.mtt-key{opacity:.55}.mtt-val{font-family:var(--mono)}
+.mx-axis-x{display:flex;font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:5px 4px 0}
+.mx-note{text-align:center;font-size:10px;color:var(--muted);margin-top:6px}
+
+/* CATEGORY */
+.cat-wrap{border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.cat-wrap thead th{cursor:pointer}
+.stk-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:1px}
+.stk-seg{min-width:0}
+.h-good{color:var(--k1);font-weight:600}.h-mid{color:var(--k3);font-weight:600}.h-bad{color:#dc2626;font-weight:600}
+
+/* ── SEARCH BOX ── */
+.search-wrap{margin-bottom:10px}
+.search-input{width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:12px;color:var(--dark);background:var(--card);outline:none;transition:border-color .12s}
+.search-input:focus{border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ── LOADING ── -->
+<div id="loadScreen">
+  <div class="ld-spinner"></div>
+  <div class="ld-text">Membaca data dari sheet RUMUS…</div>
+</div>
+
+<!-- ── ERROR ── -->
+<div id="errScreen">
+  <div class="err-box">
+    <div class="err-icon">⚠️</div>
+    <div class="err-title">Gagal memuat data</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6">Pastikan sheet bernama <strong>RUMUS</strong> ada di spreadsheet ini dan kolom <strong>Kuadran Number</strong> sudah terisi.</p>
+    <div class="err-msg" id="errMsg">—</div>
+    <button class="retry-btn" onclick="loadData()">↩ Coba lagi</button>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashScreen">
+  <header>
+    <div class="h-left">
+      <div class="h-dot"></div>
+      <span class="h-title">BCG Matrix Dashboard</span>
+    </div>
+    <div class="h-right">
+      <span class="h-badge" id="hBadge">—</span>
+      <span class="h-time" id="hTime">—</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">⟳ Refresh</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-section">
+        <div class="sb-label">Kuadran</div>
+        <button class="q-btn qb-all active" onclick="setK(0,this)">
+          <span class="qb-icon">◎</span>
+          <span class="qb-info"><div class="qb-name">Semua</div></span>
+        </button>
+        <button class="q-btn qb-1" onclick="setK(1,this)">
+          <span class="qb-icon">⭐</span>
+          <span class="qb-info"><div class="qb-name">K1 · Star</div><div class="qb-desc">High Traffic + High Conv</div></span>
+          <span class="qb-count" id="qc1">—</span>
+        </button>
+        <button class="q-btn qb-2" onclick="setK(2,this)">
+          <span class="qb-icon">💎</span>
+          <span class="qb-info"><div class="qb-name">K2 · Hidden Gem</div><div class="qb-desc">Low Traffic + High Conv</div></span>
+          <span class="qb-count" id="qc2">—</span>
+        </button>
+        <button class="q-btn qb-3" onclick="setK(3,this)">
+          <span class="qb-icon">🔧</span>
+          <span class="qb-info"><div class="qb-name">K3 · Need Fix</div><div class="qb-desc">High Traffic + Low Conv</div></span>
+          <span class="qb-count" id="qc3">—</span>
+        </button>
+        <button class="q-btn qb-4" onclick="setK(4,this)">
+          <span class="qb-icon">📦</span>
+          <span class="qb-info"><div class="qb-name">K4 · Depriority</div><div class="qb-desc">Low Traffic + Low Conv</div></span>
+          <span class="qb-count" id="qc4">—</span>
+        </button>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">Category</div>
+        <select class="cat-sel" id="catSel" onchange="setCat(this.value)">
+          <option value="">Semua category</option>
+        </select>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">Urutkan</div>
+        <div class="sort-row">
+          <button class="sort-btn active" onclick="setSort('sales',this)">Sales</button>
+          <button class="sort-btn" onclick="setSort('traffic',this)">Traffic</button>
+          <button class="sort-btn" onclick="setSort('cr',this)">CR%</button>
+          <button class="sort-btn" onclick="setSort('roas',this)">ROAS</button>
+        </div>
+      </div>
+
+      <div class="sb-divider"></div>
+
+      <div class="sb-kpi-block">
+        <div class="sb-kpi-label">Insight</div>
+        <div id="insightPanel"></div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <!-- KPI STRIP -->
+      <div class="strip">
+        <div class="kpi-cell k1" onclick="setK(1,document.querySelectorAll('.q-btn')[1])">
+          <div class="kc-label">⭐ K1 · Star</div>
+          <div class="kc-val" id="kv1">—</div>
+          <div class="kc-sub4" id="ks1">—</div>
+        </div>
+        <div class="kpi-cell k2" onclick="setK(2,document.querySelectorAll('.q-btn')[2])">
+          <div class="kc-label">💎 K2 · Hidden Gem</div>
+          <div class="kc-val" id="kv2">—</div>
+          <div class="kc-sub4" id="ks2">—</div>
+        </div>
+        <div class="kpi-cell k3" onclick="setK(3,document.querySelectorAll('.q-btn')[3])">
+          <div class="kc-label">🔧 K3 · Need Fix</div>
+          <div class="kc-val" id="kv3">—</div>
+          <div class="kc-sub4" id="ks3">—</div>
+        </div>
+        <div class="kpi-cell k4" onclick="setK(4,document.querySelectorAll('.q-btn')[4])">
+          <div class="kc-label">📦 K4 · Depriority</div>
+          <div class="kc-val" id="kv4">—</div>
+          <div class="kc-sub4" id="ks4">—</div>
+        </div>
+      </div>
+
+      <!-- INNER -->
+      <div class="inner">
+        <div class="tab-bar">
+          <button class="tab active" onclick="setTab('table',this)">📋 Produk</button>
+          <button class="tab" onclick="setTab('matrix',this)">🔲 BCG Matrix</button>
+          <button class="tab" onclick="setTab('cat',this)">📊 By Category</button>
+        </div>
+
+        <!-- TABLE -->
+        <div id="view-table">
+          <div class="search-wrap">
+            <input class="search-input" id="searchBox" type="text" placeholder="🔍 Cari nama produk…" oninput="ST.search=this.value;ST.page=1;renderTable()">
+          </div>
+          <div class="count-info" id="countInfo"></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th onclick="setSort('name',null)">Produk</th>
+                <th onclick="setSort('k',null)">Kuadran</th>
+                <th onclick="setSort('sales',null)">Sales ↓</th>
+                <th onclick="setSort('traffic',null)">Traffic</th>
+                <th onclick="setSort('cr',null)">CR%</th>
+                <th onclick="setSort('roas',null)">ROAS</th>
+                <th>Action</th>
+              </tr></thead>
+              <tbody id="tBody"></tbody>
+            </table>
+          </div>
+          <div class="pg-row" id="pgRow"></div>
+        </div>
+
+        <!-- MATRIX -->
+        <div id="view-matrix" style="display:none">
+          <div class="mx-outer">
+            <div class="mx-yaxis">Traffic ↑</div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 4px 5px">
+                <span>Tinggi</span><span>Rendah</span>
+              </div>
+              <div class="mx-grid">
+                <div class="mq mq-k1">
+                  <div class="mq-head"><span style="font-size:13px">⭐</span><span class="mq-lbl">K1 · Star</span><span class="mq-cnt" id="mc1"></span></div>
+                  <div class="dot-area" id="da1"><div class="mx-tooltip" id="tt1"></div></div>
+                </div>
+                <div class="mq mq-k3">
+                  <div class="mq-head"><span style="font-size:13px">🔧</span><span class="mq-lbl">K3 · Need Fix</span><span class="mq-cnt" id="mc3"></span></div>
+                  <div class="dot-area" id="da3"><div class="mx-tooltip" id="tt3"></div></div>
+                </div>
+                <div class="mq mq-k2">
+                  <div class="mq-head"><span style="font-size:13px">💎</span><span class="mq-lbl">K2 · Hidden Gem</span><span class="mq-cnt" id="mc2"></span></div>
+                  <div class="dot-area" id="da2"><div class="mx-tooltip" id="tt2"></div></div>
+                </div>
+                <div class="mq mq-k4">
+                  <div class="mq-head"><span style="font-size:13px">📦</span><span class="mq-lbl">K4 · Depriority</span><span class="mq-cnt" id="mc4"></span></div>
+                  <div class="dot-area" id="da4"><div class="mx-tooltip" id="tt4"></div></div>
+                </div>
+              </div>
+              <div class="mx-axis-x">
+                <span style="flex:1;text-align:center;font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">↑ High Conv</span>
+                <span style="flex:1;text-align:center;font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Low Conv ↓</span>
+              </div>
+              <div class="mx-note">Ukuran dot = Sales · Hover untuk detail produk</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORY -->
+        <div id="view-cat" style="display:none">
+          <div class="cat-wrap">
+            <table>
+              <thead><tr>
+                <th onclick="sc('name')">Category</th>
+                <th onclick="sc('total')" style="text-align:center">Total</th>
+                <th onclick="sc('k1')" style="text-align:center">⭐ K1</th>
+                <th onclick="sc('k2')" style="text-align:center">💎 K2</th>
+                <th onclick="sc('k3')" style="text-align:center">🔧 K3</th>
+                <th onclick="sc('k4')" style="text-align:center">📦 K4</th>
+                <th>Distribusi</th>
+                <th onclick="sc('sales')" style="text-align:right">Revenue</th>
+                <th onclick="sc('health')" style="text-align:center">Health</th>
+              </tr></thead>
+              <tbody id="cBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+var RAW = [];
+var ST  = { k: 0, cat: '', sort: 'sales', asc: false, page: 1, search: '' };
+var CSK = 'total', CSA = false;
+var PP  = 25;
+
+var KC = { 1:'#059669', 2:'#2563eb', 3:'#d97706', 4:'#9ca3af' };
+var KL = { 1:'⭐ K1 · Star', 2:'💎 K2 · Gem', 3:'🔧 K3 · Fix', 4:'📦 K4 · Deprio' };
+var KA = { 1:'🚀 Scale Ads', 2:'💡 Boost Budget', 3:'🔧 Fix PDP', 4:'📦 Depriority' };
+var KS = {
+  1:'background:#d1fae5;color:#065f46',
+  2:'background:#dbeafe;color:#1e40af',
+  3:'background:#fef3c7;color:#92400e',
+  4:'background:#f3f4f6;color:#374151'
+};
+
+// ── FORMAT HELPERS ────────────────────────────────────────────
+function fm(n) {
+  if (n >= 1e9) return 'Rp '+(n/1e9).toFixed(1)+'M';
+  if (n >= 1e6) return 'Rp '+(n/1e6).toFixed(1)+'jt';
+  if (n >= 1e3) return 'Rp '+(n/1e3).toFixed(0)+'rb';
+  return 'Rp '+Math.round(n);
+}
+function fn(n){ return Math.round(n).toLocaleString('id-ID'); }
+
+// ── LOAD DATA FROM GAS ────────────────────────────────────────
+function loadData() {
+  show('loadScreen');
+  var btn = document.getElementById('refreshBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Loading…'; }
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (btn) { btn.disabled = false; btn.textContent = '⟳ Refresh'; }
+      if (!res.ok) {
+        document.getElementById('errMsg').textContent = res.error || 'Error tidak diketahui';
+        show('errScreen');
+        return;
+      }
+      RAW = res.rows;
+      if (!RAW.length) {
+        document.getElementById('errMsg').textContent = 'Tidak ada baris valid di sheet RUMUS. Pastikan kolom Kuadran Number terisi 1–4.';
+        show('errScreen');
+        return;
+      }
+      buildDash(res);
+    })
+    .withFailureHandler(function(err) {
+      if (btn) { btn.disabled = false; btn.textContent = '⟳ Refresh'; }
+      document.getElementById('errMsg').textContent = String(err.message || err);
+      show('errScreen');
+    })
+    .getSheetData();
+}
+
+function show(id) {
+  ['loadScreen','errScreen','dashScreen'].forEach(function(s){
+    document.getElementById(s).style.display = s === id ? (id === 'dashScreen' ? 'block' : 'flex') : 'none';
+  });
+}
+
+// ── BUILD DASHBOARD ───────────────────────────────────────────
+function buildDash(res) {
+  // Category dropdown
+  var cats = [];
+  RAW.forEach(function(p){ if (cats.indexOf(p.category) === -1) cats.push(p.category); });
+  cats.sort();
+  var sel = document.getElementById('catSel');
+  sel.innerHTML = '<option value="">Semua category</option>' + cats.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+
+  // Header
+  var catCount = cats.filter(function(c){ return c !== 'Uncategorized'; }).length;
+  document.getElementById('hBadge').textContent = RAW.length + ' SKU · ' + catCount + ' kategori';
+  document.getElementById('hTime').textContent  = res.readAt || '';
+
+  // Sidebar counts
+  [1,2,3,4].forEach(function(ki){
+    document.getElementById('qc'+ki).textContent = RAW.filter(function(p){ return p.k === ki; }).length;
+  });
+
+  buildStrip();
+  updateInsight();
+
+  show('dashScreen');
+  renderTable();
+}
+
+function buildStrip() {
+  function g(ki){ return RAW.filter(function(p){ return p.k === ki; }); }
+  function avg(arr, key){
+    var w = arr.filter(function(p){ return p[key] > 0; });
+    return w.length ? w.reduce(function(s,p){ return s+p[key]; }, 0)/w.length : 0;
+  }
+  function sub4(ki){
+    var grp = g(ki);
+    var avgT  = grp.length ? Math.round(grp.reduce(function(s,p){ return s+p.traffic; },0)/grp.length) : 0;
+    var avgC  = grp.length ? (grp.reduce(function(s,p){ return s+p.cr; },0)/grp.length).toFixed(2) : '0';
+    var avgR  = avg(grp,'roas');
+    return '<div class="kc-sub4">'
+      +'<div class="kc-sub4-item"><div class="kc-sub4-val">'+grp.length+'</div><div class="kc-sub4-lbl">Total SKU</div></div>'
+      +'<div class="kc-sub4-item"><div class="kc-sub4-val">'+fn(avgT)+'</div><div class="kc-sub4-lbl">Avg Traffic</div></div>'
+      +'<div class="kc-sub4-item"><div class="kc-sub4-val">'+avgC+'%</div><div class="kc-sub4-lbl">Avg CR</div></div>'
+      +'<div class="kc-sub4-item"><div class="kc-sub4-val">'+(avgR>0?avgR.toFixed(1)+'x':'—')+'</div><div class="kc-sub4-lbl">Avg ROAS</div></div>'
+      +'</div>';
+  }
+  [1,2,3,4].forEach(function(ki){
+    document.getElementById('kv'+ki).textContent = fm(g(ki).reduce(function(s,p){ return s+p.sales; }, 0));
+    document.getElementById('ks'+ki).innerHTML   = sub4(ki);
+  });
+}
+
+function updateInsight() {
+  var k    = ST.k;
+  var data = getF();
+  var panel= document.getElementById('insightPanel');
+  function kpiHtml(val, lbl){
+    return '<div class="sb-kpi-item"><div class="sb-kpi-val">'+val+'</div><div class="sb-kpi-sub">'+lbl+'</div></div>';
+  }
+  if (k === 0) {
+    var ts = RAW.reduce(function(s,p){ return s+p.sales; }, 0);
+    var tb = RAW.reduce(function(s,p){ return s+p.biaya; }, 0);
+    panel.innerHTML = kpiHtml(fm(ts),'Total Revenue') + kpiHtml(fm(tb),'Total Biaya Ads')
+      + '<div class="sb-insight">💎 K2 = '+RAW.filter(function(p){ return p.k===2; }).length+' SKU CR bagus, 0 budget ads — kandidat utama switch budget dari K4.</div>';
+  } else if (k === 1) {
+    var noAds  = data.filter(function(p){ return p.roas === 0; }).length;
+    var wAds   = data.filter(function(p){ return p.roas > 0; });
+    var avg    = wAds.length ? (wAds.reduce(function(s,p){ return s+p.roas; },0)/wAds.length).toFixed(2) : '—';
+    panel.innerHTML = kpiHtml(noAds+' SKU','K1 belum beriklan') + kpiHtml(avg+'x','ROAS avg yang iklan')
+      + '<div class="sb-insight" style="border-left-color:var(--k1);background:var(--k1b)">🚀 '+noAds+' produk K1 tanpa ads = prioritas campaign baru.</div>';
+  } else if (k === 2) {
+    var avgCr2 = data.length ? (data.reduce(function(s,p){ return s+p.cr; },0)/data.length).toFixed(2) : '0';
+    var cmap   = {};
+    data.forEach(function(p){ cmap[p.category] = (cmap[p.category]||0)+1; });
+    var top    = Object.keys(cmap).sort(function(a,b){ return cmap[b]-cmap[a]; })[0] || '—';
+    panel.innerHTML = kpiHtml(avgCr2+'%','CR rata-rata K2') + kpiHtml(top,'Kategori terbanyak')
+      + '<div class="sb-insight">💎 Switch budget K4 → top K2 by sales. Proyeksi ROAS 6–7x.</div>';
+  } else if (k === 3) {
+    var wA3  = data.filter(function(p){ return p.roas > 0; });
+    var avg3 = wA3.length ? (wA3.reduce(function(s,p){ return s+p.roas; },0)/wA3.length).toFixed(2) : '—';
+    panel.innerHTML = kpiHtml(avg3+'x','ROAS avg K3 beriklan') + kpiHtml(fn(data.reduce(function(s,p){ return s+p.traffic; },0)),'Total traffic K3')
+      + '<div class="sb-insight" style="border-left-color:var(--k3);background:var(--k3b)">🔧 Fix PDP dulu — lifestyle foto, ukuran, harga. Baru scale ads.</div>';
+  } else {
+    panel.innerHTML = kpiHtml(data.length+' SKU','Total K4') + kpiHtml(fm(data.reduce(function(s,p){ return s+p.sales; },0)),'Revenue K4')
+      + '<div class="sb-insight" style="border-left-color:var(--k4);background:var(--k4b)">📦 Stop ads K4. Review konten & stok. Pertimbangkan bundling.</div>';
+  }
+}
+
+// ── FILTER / SORT ─────────────────────────────────────────────
+function getF() {
+  var q = (ST.search || '').toLowerCase();
+  return RAW.filter(function(p){
+    return (ST.k === 0 || p.k === ST.k)
+      && (!ST.cat || p.category === ST.cat)
+      && (!q || p.name.toLowerCase().indexOf(q) !== -1);
+  });
+}
+function getS(d) {
+  return d.slice().sort(function(a, b){
+    var va = a[ST.sort] !== undefined ? a[ST.sort] : 0;
+    var vb = b[ST.sort] !== undefined ? b[ST.sort] : 0;
+    if (ST.sort === 'name') { va = a.name; vb = b.name; }
+    if (typeof va === 'string') return ST.asc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return ST.asc ? va - vb : vb - va;
+  });
+}
+
+function setK(k, btn) {
+  ST.k = k; ST.page = 1;
+  document.querySelectorAll('.q-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  updateInsight();
+  render();
+}
+function setCat(v) { ST.cat = v; ST.page = 1; render(); }
+function setSort(s, btn) {
+  if (ST.sort === s) ST.asc = !ST.asc; else { ST.sort = s; ST.asc = false; }
+  ST.page = 1;
+  if (btn) {
+    document.querySelectorAll('.sort-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+  render();
+}
+
+function render() {
+  var tab = document.querySelector('.tab.active').textContent.trim();
+  if (tab.indexOf('Produk') !== -1) renderTable();
+  else if (tab.indexOf('Matrix') !== -1) renderMatrix();
+  else renderCat();
+}
+
+// ── TABLE ─────────────────────────────────────────────────────
+function renderTable() {
+  var data = getS(getF()), tot = data.length, st = (ST.page-1)*PP;
+  var pg   = data.slice(st, st+PP);
+  var mx   = Math.max.apply(null, data.map(function(p){ return p.sales; }).concat([1]));
+
+  document.getElementById('countInfo').innerHTML =
+    'Menampilkan <strong>'+(st+1)+'–'+Math.min(st+PP,tot)+'</strong> dari <strong>'+tot+'</strong> produk';
+
+  document.getElementById('tBody').innerHTML = pg.map(function(p){
+    var bw = Math.round(p.sales/mx*100);
+    var nm = p.link
+      ? '<a href="'+p.link+'" target="_blank" class="nm-link" title="'+p.name+'">'+p.name+'</a>'
+      : '<span class="nm-plain" title="'+p.name+'">'+p.name+'</span>';
+    return '<tr>'
+      +'<td><div style="max-width:220px">'+nm+'<div class="nm-cat">'+p.category+'</div></div></td>'
+      +'<td><span class="chip c'+p.k+'">'+KL[p.k]+'</span></td>'
+      +'<td><div class="mono">'+fm(p.sales)+'</div><div class="bar-bg"><div class="bar-fg" style="width:'+bw+'%;background:'+KC[p.k]+'"></div></div></td>'
+      +'<td class="mono">'+fn(p.traffic)+'</td>'
+      +'<td><span class="'+(p.cr>=p.bench_cr?'cr-ok':'cr-bad')+'">'+p.cr.toFixed(2)+'%</span></td>'
+      +'<td class="mono">'+(p.roas>0?p.roas.toFixed(2)+'x':'—')+'</td>'
+      +'<td><span class="action-chip" style="'+KS[p.k]+'">'+KA[p.k]+'</span></td>'
+      +'</tr>';
+  }).join('');
+
+  var pgs = Math.ceil(tot/PP);
+  document.getElementById('pgRow').innerHTML =
+    '<button class="pg-btn" onclick="gp('+(ST.page-1)+')" '+(ST.page<=1?'disabled':'')+'>← Prev</button>'
+    +'<span class="pg-info">'+ST.page+' / '+pgs+'</span>'
+    +'<button class="pg-btn" onclick="gp('+(ST.page+1)+')" '+(ST.page>=pgs?'disabled':'')+'>Next →</button>';
+}
+function gp(p){ ST.page=p; renderTable(); }
+
+// ── MATRIX ────────────────────────────────────────────────────
+function renderMatrix() {
+  var mx = Math.max.apply(null, RAW.map(function(p){ return p.sales; }).concat([1]));
+  [1,2,3,4].forEach(function(ki){
+    var grp = RAW.filter(function(p){ return p.k===ki; });
+    document.getElementById('mc'+ki).textContent = grp.length+' SKU';
+    var da  = document.getElementById('da'+ki);
+    Array.prototype.slice.call(da.children).forEach(function(c){
+      if (!c.classList.contains('mx-tooltip')) c.parentNode.removeChild(c);
+    });
+    grp.forEach(function(p){
+      var sz  = Math.max(6, Math.min(20, Math.sqrt(p.sales/mx)*40));
+      var dot = document.createElement('div');
+      dot.className = 'dot';
+      var left = 8+Math.random()*80, top = 5+Math.random()*82;
+      dot.style.cssText = 'left:'+left+'%;top:'+top+'%;width:'+sz+'px;height:'+sz+'px;background:'+KC[ki]+';opacity:.75;transform:translate(-50%,-50%)';
+      (function(pp, ki2, left2, sz2){
+        dot.addEventListener('mouseenter', function(){
+          var tt = document.getElementById('tt'+ki2);
+          tt.innerHTML = '<div class="mtt-name">'+pp.name+'</div>'
+            +'<div class="mtt-row"><span class="mtt-key">Sales</span><span class="mtt-val">'+fm(pp.sales)+'</span></div>'
+            +'<div class="mtt-row"><span class="mtt-key">Traffic</span><span class="mtt-val">'+fn(pp.traffic)+'</span></div>'
+            +'<div class="mtt-row"><span class="mtt-key">CR%</span><span class="mtt-val">'+pp.cr.toFixed(2)+'%</span></div>'
+            +'<div class="mtt-row"><span class="mtt-key">ROAS</span><span class="mtt-val">'+(pp.roas>0?pp.roas.toFixed(2)+'x':'—')+'</span></div>';
+          var dw = da.offsetWidth;
+          var dl = left2/100*dw;
+          tt.style.display = 'block';
+          tt.style.left = (dl+sz2+6>dw-210?dl-215:dl+sz2/2+6)+'px';
+          tt.style.top  = top+'%';
+        });
+        dot.addEventListener('mouseleave', function(){
+          document.getElementById('tt'+ki2).style.display = 'none';
+        });
+      })(p, ki, left, sz);
+      da.appendChild(dot);
+    });
+  });
+}
+
+// ── CATEGORY ──────────────────────────────────────────────────
+function renderCat() {
+  var cats = {};
+  RAW.forEach(function(p){
+    if (!cats[p.category]) cats[p.category] = {total:0,k1:0,k2:0,k3:0,k4:0,sales:0};
+    cats[p.category].total++;
+    cats[p.category]['k'+p.k]++;
+    cats[p.category].sales += p.sales;
+  });
+  Object.keys(cats).forEach(function(c){
+    var d = cats[c];
+    d.health = Math.round((d.k1+d.k2)/Math.max(1,d.total)*100);
+  });
+  var ents = Object.keys(cats).map(function(k){ return [k, cats[k]]; }).sort(function(a,b){
+    var va = a[1][CSK]!==undefined?a[1][CSK]:0, vb = b[1][CSK]!==undefined?b[1][CSK]:0;
+    if (CSK==='name'){ va=a[0]; vb=b[0]; }
+    return typeof va==='string'?(CSA?va.localeCompare(vb):vb.localeCompare(va)):(CSA?va-vb:vb-va);
+  });
+  var mxS = Math.max.apply(null, ents.map(function(e){ return e[1].sales; }).concat([1]));
+
+  document.getElementById('cBody').innerHTML = ents.map(function(e){
+    var nm=e[0], d=e[1];
+    var hc = d.health>=60?'h-good':d.health>=35?'h-mid':'h-bad';
+    var bw = Math.round(d.sales/mxS*100);
+    return '<tr style="cursor:pointer" onclick="setCatAndTab(\''+nm.replace(/'/g,"\\'")+'\')">'
+      +'<td style="font-weight:600;font-size:12px">'+nm+'</td>'
+      +'<td style="text-align:center;font-family:var(--mono);font-weight:600">'+d.total+'</td>'
+      +'<td style="text-align:center;color:var(--k1);font-weight:600">'+d.k1+'</td>'
+      +'<td style="text-align:center;color:var(--k2);font-weight:600">'+d.k2+'</td>'
+      +'<td style="text-align:center;color:var(--k3);font-weight:600">'+d.k3+'</td>'
+      +'<td style="text-align:center;color:var(--k4);font-weight:600">'+d.k4+'</td>'
+      +'<td><div class="stk-bar" style="width:'+bw+'%">'
+      +'<div class="stk-seg" style="flex:'+d.k1+';background:var(--k1)"></div>'
+      +'<div class="stk-seg" style="flex:'+d.k2+';background:var(--k2)"></div>'
+      +'<div class="stk-seg" style="flex:'+d.k3+';background:var(--k3)"></div>'
+      +'<div class="stk-seg" style="flex:'+d.k4+';background:#e5e7eb"></div>'
+      +'</div></td>'
+      +'<td style="text-align:right;font-family:var(--mono);font-size:11px">'+fm(d.sales)+'</td>'
+      +'<td style="text-align:center"><span class="'+hc+'">'+d.health+'%</span></td>'
+      +'</tr>';
+  }).join('');
+}
+function sc(k){ if(CSK===k) CSA=!CSA; else{CSK=k;CSA=false;} renderCat(); }
+function setCatAndTab(nm){
+  ST.cat=nm;
+  document.getElementById('catSel').value=nm;
+  setTab('table', document.querySelector('.tab'));
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+function setTab(t, btn) {
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  ['table','matrix','cat'].forEach(function(v){
+    document.getElementById('view-'+v).style.display = v===t?'':'none';
+  });
+  if (t==='table') renderTable();
+  else if (t==='matrix') renderMatrix();
+  else renderCat();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+window.onload = loadData;
+</script>
+</body>
+</html>
