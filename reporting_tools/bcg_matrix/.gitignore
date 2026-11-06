@@ -1,0 +1,11 @@
+# Data klien: jangan di-commit
+*.csv
+*.xlsx
+*.xls
+sample_data/
+exports/
+
+# Lokal
+.DS_Store
+.clasp.json
+.env

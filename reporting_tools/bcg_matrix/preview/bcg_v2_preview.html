@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BCG Matrix v2 — Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f8f9fb;--card:#fff;--bd:#e5e7eb;--tx:#111827;--mid:#4b5563;--mut:#9ca3af;--hd:#111827;--hdt:#fff;
+--k1:#059669;--k1b:#d1fae5;--k2:#2563eb;--k2b:#dbeafe;--k3:#d97706;--k3b:#fef3c7;--k4:#6b7280;--k4b:#f3f4f6;
+--up:#059669;--dn:#dc2626;--upb:#d1fae5;--dnb:#fee2e2;--ac:#7c3aed;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1117;--card:#181b23;--bd:#2a2f3a;--tx:#f3f4f6;--mid:#b6bcc8;--mut:#6b7280;--hd:#0b0d12;
+--k1b:#064e3b;--k2b:#1e3a8a;--k3b:#78350f;--k4b:#262a33;--upb:#064e3b;--dnb:#7f1d1d;color-scheme:dark}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:13px}
+.mono{font-family:'DM Mono',ui-monospace,monospace;font-size:11.5px}
+header{background:var(--hd);color:var(--hdt);padding:12px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+header b{font-size:14px}.tag{font-size:10px;background:var(--ac);padding:2px 7px;border-radius:4px;font-weight:600}
+header .sp{flex:1}select,input{font:inherit;font-size:12px;padding:6px 9px;border:1px solid var(--bd);border-radius:7px;background:var(--card);color:var(--tx)}
+main{padding:16px 22px;max-width:1280px;margin:auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;border-top:3px solid var(--bd)}
+.kpi small{display:block;color:var(--mut);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.kpi b{font-family:'DM Mono',monospace;font-size:18px;font-weight:500}.kpi i{display:block;font-style:normal;font-size:10.5px;color:var(--mut);margin-top:2px}
+.kpi.up{border-top-color:var(--up)}.kpi.dn{border-top-color:var(--dn)}.kpi.wa{border-top-color:var(--k3)}.kpi.bl{border-top-color:var(--k2)}
+.tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.tab,.chip{font:inherit;font-size:12px;font-weight:500;padding:6px 13px;border:1px solid var(--bd);border-radius:7px;background:var(--card);color:var(--mid);cursor:pointer}
+.tab.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.chip{padding:4px 10px;font-size:11.5px}.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.bar{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:var(--hd);color:#fff;font-size:10.5px;font-weight:500;text-align:left;padding:8px 11px;white-space:nowrap;cursor:pointer}
+td{padding:7px 11px;border-top:1px solid var(--bd);vertical-align:middle;white-space:nowrap}
+tr:hover td{background:color-mix(in srgb,var(--ac) 5%,transparent)}
+.nm{max-width:230px;overflow:hidden;text-overflow:ellipsis;font-weight:500}.ct{font-size:10px;color:var(--mut)}
+.q{display:inline-flex;width:20px;height:20px;border-radius:5px;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:2px}
+.q1{background:var(--k1b);color:var(--k1)}.q2{background:var(--k2b);color:var(--k2)}.q3{background:var(--k3b);color:var(--k3)}.q4{background:var(--k4b);color:var(--k4)}
+.q.now{outline:2px solid var(--tx);outline-offset:1px}
+.dl{font-weight:600;font-size:11px;padding:2px 7px;border-radius:4px}.dl.u{background:var(--upb);color:var(--up)}.dl.d{background:var(--dnb);color:var(--dn)}.dl.f{color:var(--mut)}
+.vd{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:4px}.vd.o{background:var(--dnb);color:var(--dn)}.vd.s{background:var(--k2b);color:var(--k2)}.vd.ok{color:var(--mut);font-weight:400}
+.sb{height:5px;background:var(--bd);border-radius:3px;width:90px;margin-top:3px}.sb>div{height:100%;border-radius:3px}
+.stk{display:flex;height:18px;width:170px;border-radius:5px;overflow:hidden;gap:1px;background:var(--bd)}.stk span{display:flex;align-items:center;justify-content:center;font:600 10px 'DM Mono',monospace;color:#fff;min-width:0}
+.mx{display:grid;grid-template-columns:70px repeat(4,1fr);gap:4px;max-width:640px}
+.mx div{padding:14px 6px;text-align:center;border-radius:8px;font-family:'DM Mono',monospace;font-size:15px}
+.mx .h{background:none;font:600 10px 'DM Sans';color:var(--mut);padding:6px}
+.mx .c{cursor:pointer;border:1px solid var(--bd)}.mx .c:hover{border-color:var(--ac)}
+.mx .c.u{background:var(--upb);color:var(--up)}.mx .c.d{background:var(--dnb);color:var(--dn)}.mx .c.s{background:var(--card);color:var(--mid)}
+.note{font-size:11.5px;color:var(--mid);line-height:1.6;margin:10px 0}
+.legend{font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <b>BCG Matrix v2</b><span class="tag">PREVIEW · DATA DUMMY</span><span class="sp"></span>
+  <label style="font-size:11px;color:#9ca3af">Bulan</label><select id="mSel"></select>
+  <label style="font-size:11px;color:#9ca3af">Kategori</label><select id="cSel"></select>
+</header>
+<main>
+  <div class="kpis" id="kpis"></div>
+  <div class="tabs">
+    <button class="tab on" data-t="prod">Produk + Ad Spend</button>
+    <button class="tab" data-t="cat">Kategori + Ad Spend</button>
+  </div>
+  <section id="prod"></section>
+  <section id="cat" hidden></section>
+</main>
+<script>
+// ── DUMMY DATA ───────────────────────────────────────────────
+var MONTHS=['Mei','Jun','Jul','Agu','Sep','Okt'], N=MONTHS.length;
+var CATS=['Poster Pendidikan','Planner & Jadwal','Frame Dinding','Wall Decor Anak','Hampers & Gift','Rak & Organizer','Stiker Dinding','Lainnya'];
+var TR_T=400, CR_T=3, ROAS_T=3;           // threshold traffic, CR%, target ROAS (dummy)
+var seed=7;function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
+var NAMES=['Frame Bingkai Set Presiden','Planner Sekolah Blue Wipe','Poster Abjad Hijaiyah','Wall Decor Kayu Anak','Hampers Lebaran Box','Rak Dinding Floating','Stiker Dinding Peta Dunia','Poster Tata Surya','Jadwal Pelajaran Magnet','Frame Foto Kolase','Papan Tulis Mini','Poster Doa Harian','Dekorasi Kamar Bintang','Organizer Meja Kayu','Stiker Hewan Safari'];
+var P=[];
+for(var i=0;i<64;i++){
+  var cat=CATS[Math.floor(rnd()*CATS.length)], price=15000+Math.round(rnd()*13)*10000;
+  var t=100*Math.pow(35,rnd()), cr=0.8+rnd()*7, adOn=rnd()<.62, adLvl=.05+rnd()*.3, hist=[];
+  for(var m=0;m<N;m++){
+    t=Math.max(40,t*(1+(rnd()-.45)*.45)); cr=Math.min(11,Math.max(.3,cr+(rnd()-.5)*2.2));
+    var buyers=Math.round(t*cr/100), sales=buyers*price*(1+rnd()*.3);
+    var k=t>=TR_T?(cr>=CR_T?1:3):(cr>=CR_T?2:4);
+    var spend=0,roas=0;
+    if(adOn&&!(k===2&&rnd()<.7)){spend=Math.round((sales*adLvl+20000)/1000)*1000;roas=Math.max(.4,(cr/CR_T)*(2+rnd()*5)*(k>=3?.7:1.1));}
+    hist.push({t:Math.round(t),cr:cr,sales:Math.round(sales),k:k,spend:spend,roas:roas,adRev:spend*roas});
+  }
+  P.push({id:'2991'+(5300000+i*137),name:NAMES[i%NAMES.length]+(i>=NAMES.length?' V'+(Math.floor(i/NAMES.length)+1):''),cat:cat,h:hist});
+}
+// ── STATE & HELPERS ──────────────────────────────────────────
+var S={m:N-1,cat:'',tab:'prod',flt:'all',from:0,to:0,q:'',sk:'spend',asc:false};
+var SCORE={1:4,2:3,3:2,4:1};
+function fm(n){return n>=1e9?'Rp '+(n/1e9).toFixed(1)+'M':n>=1e6?'Rp '+(n/1e6).toFixed(1)+'jt':n>=1e3?'Rp '+Math.round(n/1e3)+'rb':'Rp '+Math.round(n)}
+function $(id){return document.getElementById(id)}
+function pct(a,b){return b?a/b*100:0}
+function spark(vals,w,h,col){var mx=Math.max.apply(null,vals.concat([1])),s=w/(vals.length-1);
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><polyline fill="none" stroke="'+col+'" stroke-width="1.6" points="'+vals.map(function(v,i){return (i*s).toFixed(1)+','+(h-2-v/mx*(h-4)).toFixed(1)}).join(' ')+'"/></svg>'}
+// ── VERDICT ENGINE ───────────────────────────────────────────
+function enrich(){
+  var m=S.m, sp=[];
+  P.forEach(function(p){var c=p.h[m];if(c.spend>0)sp.push(c.spend)});sp.sort(function(a,b){return a-b});
+  var med=sp[Math.floor(sp.length*.5)]||0, low=sp[Math.floor(sp.length*.25)]||0;
+  P.forEach(function(p){
+    var c=p.h[m],pr=m>0?p.h[m-1]:null;
+    p.cur=c; p.prevK=pr?pr.k:c.k; p.d=pr?SCORE[c.k]-SCORE[pr.k]:0;
+    p.v=(c.k>=3&&c.spend>=med&&c.spend>0&&c.roas<ROAS_T)?'o':(c.k===2&&c.spend<=low&&c.sales>0)?'s':'';
+  });
+  return {med:med,low:low};
+}
+function rows(){return P.filter(function(p){return !S.cat||p.cat===S.cat})}
+// ── KPI ──────────────────────────────────────────────────────
+function renderKpi(){
+  var r=rows(),spend=0,rev=0,adRev=0,up=0,dn=0,ov=0,un=0,ovS=0;
+  r.forEach(function(p){var c=p.cur;spend+=c.spend;rev+=c.sales;adRev+=c.adRev;if(p.d>0)up++;if(p.d<0)dn++;if(p.v==='o'){ov++;ovS+=c.spend}if(p.v==='s')un++});
+  $('kpis').innerHTML=
+   '<div class="kpi"><small>Total Revenue</small><b>'+fm(rev)+'</b><i>'+r.length+' SKU · '+MONTHS[S.m]+' 2026</i></div>'+
+   '<div class="kpi bl"><small>Ad Spend</small><b>'+fm(spend)+'</b><i>ROAS '+(spend?(adRev/spend).toFixed(1):'—')+'x · ACR '+pct(spend,rev).toFixed(1)+'%</i></div>'+
+   '<div class="kpi up" style="cursor:pointer" onclick="S.flt=\'up\';tab(\'prod\')"><small>Naik Kuadran</small><b>'+up+' SKU</b><i>vs '+(S.m?MONTHS[S.m-1]:'—')+'</i></div>'+
+   '<div class="kpi dn" style="cursor:pointer" onclick="S.flt=\'dn\';tab(\'prod\')"><small>Turun Kuadran</small><b>'+dn+' SKU</b><i>vs '+(S.m?MONTHS[S.m-1]:'—')+'</i></div>'+
+   '<div class="kpi wa"><small>Overspend (K3/K4)</small><b>'+ov+' SKU</b><i>'+fm(ovS)+' · '+pct(ovS,spend).toFixed(0)+'% dari spend</i></div>'+
+   '<div class="kpi bl"><small>Underspend (K2)</small><b>'+un+' SKU</b><i>CR bagus, budget minim</i></div>';
+}
+// ── TAB: PRODUK ──────────────────────────────────────────────
+function trail(p){return p.h.map(function(c,i){return '<span class="q q'+c.k+(i===S.m?' now':'')+'" title="'+MONTHS[i]+': K'+c.k+'">'+c.k+'</span>'}).join('')}
+function renderProd(){
+  var th=enrich(),r=rows(),tot=0;r.forEach(function(p){tot+=p.cur.spend});
+  var F={all:'Semua',up:'▲ Naik',dn:'▼ Turun',o:'Overspend',s:'Underspend'};
+  r=r.filter(function(p){
+    if(S.q&&p.name.toLowerCase().indexOf(S.q)<0)return false;
+    if(S.flt==='up')return p.d>0; if(S.flt==='dn')return p.d<0; if(S.flt==='o'||S.flt==='s')return p.v===S.flt;
+    return true});
+  var key={spend:function(p){return p.cur.spend},sales:function(p){return p.cur.sales},roas:function(p){return p.cur.roas},k:function(p){return p.cur.k},d:function(p){return p.d},name:function(p){return p.name}}[S.sk];
+  r.sort(function(a,b){var x=key(a),y=key(b);var v=typeof x==='string'?x.localeCompare(y):x-y;return S.asc?v:-v});
+  var chips=Object.keys(F).map(function(k){return '<button class="chip'+(S.flt===k?' on':'')+'" onclick="S.flt=\''+k+'\';renderProd()">'+F[k]+'</button>'}).join('');
+  var mx=Math.max.apply(null,r.map(function(p){return p.cur.spend}).concat([1]));
+  var body=r.slice(0,40).map(function(p){var c=p.cur,mv='K'+p.prevK+' → K'+c.k,dl=p.d>0?'<span class="dl u">▲ '+mv+'</span>':p.d<0?'<span class="dl d">▼ '+mv+'</span>':'<span class="dl f">= K'+c.k+'</span>';
+    var vd=p.v==='o'?'<span class="vd o">Overspend</span>':p.v==='s'?'<span class="vd s">Underspend</span>':'<span class="vd ok">OK</span>';
+    var col=p.v==='o'?'var(--dn)':p.v==='s'?'var(--k2)':'var(--k4)';
+    return '<tr><td><div class="nm" title="'+p.name+'">'+p.name+'</div><div class="ct">'+p.cat+'</div></td><td>'+trail(p)+'</td><td>'+dl+'</td>'+
+     '<td class="mono">'+fm(c.sales)+'</td><td class="mono">'+c.cr.toFixed(1)+'%</td>'+
+     '<td><div class="mono">'+(c.spend?fm(c.spend):'—')+'</div><div class="sb"><div style="width:'+Math.round(c.spend/mx*100)+'%;background:'+col+'"></div></div></td>'+
+     '<td class="mono">'+(c.spend?pct(c.spend,tot).toFixed(1)+'%':'—')+'</td>'+
+     '<td class="mono" style="color:'+(c.spend&&c.roas<ROAS_T?'var(--dn)':'inherit')+'">'+(c.spend?c.roas.toFixed(1)+'x':'—')+'</td><td>'+vd+'</td></tr>'}).join('');
+  var sk=function(k,l){return '<th onclick="sortP(\''+k+'\')">'+l+(S.sk===k?(S.asc?' ↑':' ↓'):'')+'</th>'};
+  $('prod').innerHTML='<div class="bar">'+chips+'<span style="flex:1"></span><input id="q" placeholder="Cari produk…" value="'+S.q+'" oninput="S.q=this.value.toLowerCase();renderProd();$(\'q\').focus()"></div>'+
+   '<div class="card"><div class="scroll"><table><thead><tr>'+sk('name','Produk')+'<th>Riwayat '+MONTHS[0]+'→'+MONTHS[N-1]+'</th>'+sk('d','Pergerakan vs '+(S.m?MONTHS[S.m-1]:'—'))+sk('sales','Revenue')+'<th>CR</th>'+sk('spend','Ad Spend')+'<th>% Spend</th>'+sk('roas','ROAS')+'<th>Keputusan</th></tr></thead><tbody>'+body+'</tbody></table></div></div>'+
+   '<p class="legend">'+r.length+' produk ditampilkan (maks 40). Kotak berangka = kuadran per bulan, outline = bulan terpilih.<br><b>Overspend</b>: K3/K4, spend ≥ median ('+fm(th.med)+') dan ROAS &lt; '+ROAS_T+'x. <b>Underspend</b>: K2 dengan spend ≤ persentil-25 ('+fm(th.low)+'). Threshold bisa diatur di config.</p>';
+}
+function sortP(k){if(S.sk===k)S.asc=!S.asc;else{S.sk=k;S.asc=false}renderProd()}
+// ── TAB: KATEGORI ────────────────────────────────────────────
+function renderCat(){
+  var C={},T={sp:0,rv:0};
+  P.forEach(function(p){var o=C[p.cat]=C[p.cat]||{n:0,k:[0,0,0,0,0],hl:[],sp:[],rv:0,spd:0,adr:0,ov:0};
+    for(var m=0;m<N;m++){o.sp[m]=(o.sp[m]||0)+p.h[m].spend;o.hl[m]=(o.hl[m]||0)+(p.h[m].k<=2?1:0)}
+    var c=p.cur;o.n++;o.k[c.k]++;o.rv+=c.sales;o.spd+=c.spend;o.adr+=c.adRev;if(p.v==='o')o.ov+=c.spend;T.sp+=c.spend;T.rv+=c.sales});
+  var ent=Object.keys(C).map(function(k){return [k,C[k]]}).sort(function(a,b){return b[1].spd-a[1].spd});
+  function stk(o){return '<div class="stk">'+[1,2,3,4].map(function(k){return o.k[k]?'<span style="flex:'+o.k[k]+';background:var(--k'+k+')" title="K'+k+': '+o.k[k]+' SKU">'+o.k[k]+'</span>':''}).join('')+'</div>'}
+  var body=ent.map(function(e){var o=e[1],hp=o.hl.map(function(v){return v/o.n*100}),ss=pct(o.spd,T.sp),rs=pct(o.rv,T.rv),ratio=rs?ss/rs:0;
+    var vd=ratio>1.3?'<span class="vd o">Overspend ('+ratio.toFixed(1)+'x)</span>':ratio<.7&&(o.k[1]+o.k[2])/o.n>.3?'<span class="vd s">Underspend ('+ratio.toFixed(1)+'x)</span>':'<span class="vd ok">Seimbang ('+ratio.toFixed(1)+'x)</span>';
+    return '<tr><td style="font-weight:600">'+e[0]+'</td><td class="mono">'+o.n+'</td>'+
+     '<td>'+stk(o)+'</td>'+
+     '<td>'+spark(hp,70,22,'var(--k1)')+' <span class="mono">'+hp[S.m].toFixed(0)+'%</span></td>'+
+     '<td class="mono">'+fm(o.rv)+'</td><td class="mono">'+fm(o.spd)+'</td>'+
+     '<td class="mono">'+(o.spd?(o.adr/o.spd).toFixed(1)+'x':'—')+'</td><td class="mono">'+pct(o.spd,o.rv).toFixed(1)+'%</td>'+
+     '<td><div class="mono">'+ss.toFixed(0)+'% spend</div><div class="sb"><div style="width:'+Math.min(100,ss*2.5)+'%;background:var(--k3)"></div></div><div class="mono" style="color:var(--mut)">'+rs.toFixed(0)+'% revenue</div><div class="sb"><div style="width:'+Math.min(100,rs*2.5)+'%;background:var(--k1)"></div></div></td>'+
+     '<td>'+spark(o.sp,70,22,'var(--ac)')+'</td><td class="mono" style="color:'+(o.ov?'var(--dn)':'inherit')+'">'+(o.ov?fm(o.ov):'—')+'</td><td>'+vd+'</td></tr>'}).join('');
+  $('cat').innerHTML='<div class="card"><div class="scroll"><table><thead><tr><th>Kategori</th><th>SKU</th><th>Komposisi SKU per kuadran</th><th>Health K1+K2 (tren)</th><th>Revenue</th><th>Ad Spend</th><th>ROAS</th><th>ACR</th><th>Share spend vs revenue</th><th>Tren spend</th><th>Spend di K3/K4 boros</th><th>Keputusan</th></tr></thead><tbody>'+body+'</tbody></table></div></div>'+
+   '<p class="legend">Bar = komposisi SKU per kuadran (hijau K1, biru K2, kuning K3, abu K4; angka = jumlah SKU). Health = % SKU di K1+K2. Rasio = share spend ÷ share revenue. &gt; 1.3x = kategori menyerap budget lebih besar dari kontribusi revenue. &lt; 0.7x dengan &gt;30% SKU di K1/K2 = kategori potensial yang kurang dibiayai.</p>';
+}
+// ── WIRING ───────────────────────────────────────────────────
+function tab(t){S.tab=t;['prod','cat'].forEach(function(s){$(s).hidden=s!==t});
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.t===t)});rerender()}
+function rerender(){enrich();renderKpi();if(S.tab==='prod')renderProd();else renderCat()}
+$('mSel').innerHTML=MONTHS.map(function(m,i){return '<option value="'+i+'"'+(i===N-1?' selected':'')+'>'+m+' 2026</option>'}).join('');
+$('cSel').innerHTML='<option value="">Semua kategori</option>'+CATS.map(function(c){return '<option>'+c+'</option>'}).join('');
+$('mSel').onchange=function(){S.m=+this.value;rerender()};
+$('cSel').onchange=function(){S.cat=this.value;rerender()};
+document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){tab(b.dataset.t)}});
+rerender();
+</script>
+</body>
+</html>

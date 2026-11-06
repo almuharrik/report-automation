@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Haydecor – Incremental Revenue by Category</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f7f8fa;--card:#fff;--tx:#1f2430;--mu:#6b7280;--bd:#e3e6ec;--up:#4285f4;--dn:#ea4335;--sub:#bdbdbd;--ac:#2563eb}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161b;--card:#1d2027;--tx:#e8eaf0;--mu:#9aa1b0;--bd:#2d313b;--sub:#6b6f78}}
+:root[data-theme="dark"]{--bg:#14161b;--card:#1d2027;--tx:#e8eaf0;--mu:#9aa1b0;--bd:#2d313b;--sub:#6b6f78}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:0 0 10px}
+.mu{color:var(--mu);font-size:12.5px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-top:14px}
+.up{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.drop{display:block;border:1.5px dashed var(--bd);border-radius:10px;padding:12px;cursor:pointer}
+.drop:hover{border-color:var(--ac)}.drop input{display:none}.drop b{display:block;font-size:13px}
+.drop.ok{border-style:solid;border-color:var(--up)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+select,input[type=month],button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 10px}
+button{cursor:pointer}button:hover{border-color:var(--ac)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+.kpi div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}
+.kpi small{color:var(--mu);display:block;font-size:12px}.kpi b{font-size:17px}
+.pos{color:var(--up)}.neg{color:var(--dn)}
+.sc{overflow-x:auto}
+svg text{fill:var(--tx);font-family:inherit}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}th{color:var(--mu);font-weight:600}
+td.n{max-width:300px;overflow:hidden;text-overflow:ellipsis;text-align:left}
+tfoot td{font-weight:700}
+.warn{border-color:#f59e0b}
+</style></head><body><main>
+<h1>Incremental Revenue by Category</h1>
+<div class="mu">Haydecor · waterfall perubahan GMV per New Category (semua proses di browser)</div>
+
+<div class="card"><h2>1. Upload data</h2>
+<div class="up">
+<label class="drop" id="d1"><b>Database histori</b><span class="mu">Consolidated Table bulan lalu atau Looker Treemap (.csv)</span><input type="file" accept=".csv" id="f1"><div class="mu" id="s1">Belum ada file</div></label>
+<label class="drop" id="d2"><b>RAW Performa Produk</b><span class="mu">File asli Shopee (parentskudetail, titik-koma) atau hasil cleaning (.csv)</span><input type="file" accept=".csv" id="f2"><div class="mu" id="s2">Belum ada file</div></label>
+<label class="drop" id="d3"><b>Product Category List</b><span class="mu">Opsional, jika ada update kategori (.csv)</span><input type="file" accept=".csv" id="f3"><div class="mu" id="s3">Belum ada file</div></label>
+</div>
+<div class="row"><span class="mu">Bulan data RAW:</span><input type="month" id="rm"><span class="mu">Bandingkan</span><select id="ma"></select><span class="mu">→</span><select id="mb"></select>
+<span class="mu">Urut</span><select id="so"><option value="g">GMV terbesar</option><option value="d">Perubahan terbesar</option></select></div>
+</div>
+
+<div id="out" hidden>
+<div class="kpi" id="kpi"></div>
+<div class="card"><h2 id="ct"></h2><div class="sc"><div id="chart"></div></div>
+<div class="row" id="dls"></div></div>
+<div class="card"><h2>Pivot per kategori</h2><div class="sc"><table id="pv"></table></div>
+<div class="mu" style="margin-top:8px">Dikeluarkan dari waterfall: kategori Additional / Accesories dan produk tanpa kategori.</div></div>
+<div class="card warn" id="um"></div>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s),MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const S={hist:{},meta:{},cat:{},raw:null,man:{},hn:0};
+const num=v=>{v=String(v||'').replace(/[^\d.,-]/g,'');if(v.includes(','))v=v.replace(/\./g,'').replace(',','.');else if(/^-?\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');return v&&isFinite(v)?+v:0};
+const shift=(p,n)=>{let[y,m]=p.split('-').map(Number);m+=n-1;y+=Math.floor(m/12);m=((m%12)+12)%12+1;return y+'-'+String(m).padStart(2,'0')};
+const ml=p=>MN[+p.slice(5)-1]+' '+p.slice(0,4);
+const rp=v=>(v<0?'-':'')+'Rp'+Math.round(Math.abs(v)).toLocaleString('id-ID');
+const jt=v=>(v<0?'-':'')+'Rp'+(Math.abs(v)/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})+' jt';
+const pc=v=>isFinite(v)?(v*100).toFixed(1).replace('.',',')+'%':'–';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function parseCSV(t){if(t.charCodeAt(0)===65279)t=t.slice(1);const first=t.split(/\r?\n/)[0],D=(first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length?';':',';const R=[];let r=[],f='',q=false;
+for(let i=0;i<t.length;i++){const c=t[i];
+if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}
+else if(c=='"')q=true;else if(c==D){r.push(f);f=''}
+else if(c=='\n'||c=='\r'){if(c=='\r'&&t[i+1]=='\n')i++;r.push(f);f='';R.push(r);r=[]}else f+=c}
+if(f||r.length){r.push(f);R.push(r)}
+const h=R.shift().map(x=>x.trim());const rows=R.filter(r=>r.length>1).map(r=>{const o={};h.forEach((k,i)=>{if(!(k in o))o[k]=(r[i]??'').trim()});return o});rows.h=h;return rows}
+const toCSV=a=>a.map(r=>r.map(v=>/[",\n]/.test(v=String(v))?'"'+v.replace(/"/g,'""')+'"':v).join(',')).join('\r\n');
+function setMeta(c,n,cat,nc){const m=S.meta[c]??={name:'',cat:'',nc:''};if(n)m.name=n;if(cat)m.cat=cat;if(nc)m.nc=nc}
+const rd=(id,fn)=>$(id).addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{let t;try{t=new TextDecoder('utf-8',{fatal:true}).decode(r.result)}catch(e){t=new TextDecoder('windows-1252').decode(r.result)}fn(t,f.name)}catch(x){alert('Gagal membaca file: '+x.message)}};r.readAsArrayBuffer(f)});
+
+rd('#f1',(t,n)=>{const rows=parseCSV(t),h=rows.h,tm=h.includes('GMV This Month');
+const cols=tm?['GMV -2 Month','GMV -1 Month','GMV This Month']:h.filter(k=>/^gmv\s+[a-z]{3}$/i.test(k));
+if(!cols.length)throw new Error('kolom GMV tidak ditemukan');
+S.hist={};const B={};
+rows.forEach(r=>{const m=(r.Report_Period||'').match(/(\d+)\/(\d+)\/(\d{4})/);if(!m||+m[3]<2020)return;
+const p=m[3]+'-'+m[2].padStart(2,'0'),c=r['Kode Produk'];if(!c)return;
+const o=((B[p]??={})[c]??=cols.map(()=>0));cols.forEach((k,i)=>o[i]+=num(r[k]));
+setMeta(c,r['Nama Produk'],r.Category,r['New Category'])});
+Object.keys(B).sort().forEach(p=>{for(const c in B[p])B[p][c].forEach((v,i)=>{(S.hist[c]??={})[shift(p,i-cols.length+1)]=v})});
+S.hn=Object.keys(S.hist).length;$('#d1').classList.add('ok');$('#s1').textContent=n+' · '+S.hn+' produk · '+allMonths().length+' bulan';
+const ms=allMonths();if(ms.length&&!$('#rm').value)$('#rm').value=shift(ms[ms.length-1],1);render(true)});
+
+rd('#f2',(t,n)=>{const rows=parseCSV(t),k='Penjualan (Pesanan Siap Dikirim) (IDR)';
+if(!rows.h.includes(k))throw new Error('kolom "'+k+'" tidak ada');
+S.raw={};let skip=0;const hv=rows.h.includes('Kode Variasi');
+rows.forEach(r=>{const c=r['Kode Produk'];if(!c)return;if(hv&&r['Kode Variasi']!=='-'){skip++;return}S.raw[c]=(S.raw[c]||0)+num(r[k]);setMeta(c,r.Produk)});
+$('#d2').classList.add('ok');$('#s2').textContent=n+' · '+Object.keys(S.raw).length+' produk induk'+(skip?' · '+skip+' baris varian diabaikan':'');
+if(!$('#rm').value){const d=new Date();$('#rm').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}render(true)});
+
+rd('#f3',(t,n)=>{const rows=parseCSV(t);S.cat={};
+rows.forEach(r=>{const c=r['Kode Produk'];if(!c)return;if(r['New Category'])S.cat[c]=r['New Category'];setMeta(c,r['Nama Produk'],r.Category)});
+$('#d3').classList.add('ok');$('#s3').textContent=n+' · '+Object.keys(S.cat).length+' produk terpetakan';render()});
+
+['#rm','#ma','#mb','#so'].forEach(i=>$(i).addEventListener('change',()=>render(i=='#rm')));
+function allMonths(){const s=new Set();for(const c in S.hist)for(const m in S.hist[c])s.add(m);if(S.raw&&$('#rm').value)s.add($('#rm').value);return[...s].sort()}
+const gm=(c,m)=>(S.raw&&m===$('#rm').value)?(S.raw[c]||0):(S.hist[c]?.[m]||0);
+const ncOf=c=>S.man[c]||S.cat[c]||S.meta[c]?.nc||'';
+const isAdd=n=>/^additional/i.test(n);
+let VIEW=null;
+
+function render(reset){
+const ms=allMonths();if(!ms.length)return;
+const A=$('#ma'),Bs=$('#mb');
+if(reset||!A.options.length){const fill=(el,v)=>{el.innerHTML=ms.map(m=>`<option value="${m}">${ml(m)}</option>`).join('');el.value=v};
+fill(A,ms[Math.max(0,ms.length-2)]);fill(Bs,ms[ms.length-1])}
+const a=A.value,b=Bs.value;
+const codes=new Set([...Object.keys(S.hist),...Object.keys(S.raw||{})]),cats={},um=[];
+codes.forEach(c=>{const x=gm(c,a),y=gm(c,b);if(!x&&!y)return;const n=ncOf(c);
+if(!n){um.push({c,x,y});return}if(isAdd(n))return;
+const o=cats[n]??={n,a:0,b:0};o.a+=x;o.b+=y});
+let L=Object.values(cats).map(o=>({...o,d:o.b-o.a}));
+L.sort($('#so').value=='d'?(p,q)=>q.d-p.d:(p,q)=>(q.a+q.b)-(p.a+p.b));
+const ta=L.reduce((s,o)=>s+o.a,0),tb=L.reduce((s,o)=>s+o.b,0);
+VIEW={a,b,L,ta,tb,um};
+$('#out').hidden=false;
+const up=L.filter(o=>o.d>0).sort((p,q)=>q.d-p.d)[0],dn=L.filter(o=>o.d<0).sort((p,q)=>p.d-q.d)[0];
+$('#kpi').innerHTML=`<div><small>GMV ${ml(a)}</small><b>${rp(ta)}</b></div><div><small>GMV ${ml(b)}</small><b>${rp(tb)}</b></div>
+<div><small>Perubahan bersih</small><b class="${tb-ta>=0?'pos':'neg'}">${rp(tb-ta)} (${pc(ta?(tb-ta)/ta:NaN)})</b></div>
+<div><small>Kenaikan terbesar</small><b class="pos">${up?esc(up.n)+' '+jt(up.d):'–'}</b></div>
+<div><small>Penurunan terbesar</small><b class="neg">${dn?esc(dn.n)+' '+jt(dn.d):'–'}</b></div>`;
+$('#ct').textContent=`Incremental Revenue by Category: ${ml(a)} → ${ml(b)}`;
+$('#chart').innerHTML=chartSVG(false);
+$('#pv').innerHTML=`<thead><tr><th>Kategori</th><th>GMV ${ml(a)}</th><th>GMV ${ml(b)}</th><th>Perubahan</th><th>Growth</th></tr></thead><tbody>`+
+L.map(o=>`<tr><td>${esc(o.n)}</td><td>${rp(o.a)}</td><td>${rp(o.b)}</td><td class="${o.d>=0?'pos':'neg'}">${rp(o.d)}</td><td class="${o.d>=0?'pos':'neg'}">${pc(o.a?o.d/o.a:NaN)}</td></tr>`).join('')+
+`</tbody><tfoot><tr><td>Total</td><td>${rp(ta)}</td><td>${rp(tb)}</td><td>${rp(tb-ta)}</td><td>${pc(ta?(tb-ta)/ta:NaN)}</td></tr></tfoot>`;
+renderUM();dlUI()}
+
+function chartSVG(ex){
+const {L,ta,tb}=VIEW,P=ex?{up:'#4285f4',dn:'#ea4335',sub:'#bdbdbd',tx:'#222',gr:'#ddd',bg:'#fff'}:{up:'var(--up)',dn:'var(--dn)',sub:'var(--sub)',tx:'var(--tx)',gr:'var(--bd)',bg:'none'};
+const n=L.length+1,W=Math.max(1000,n*92+92),l=78,r=14,t=34,bw=(W-l-r)/n,mc=Math.max(7,Math.floor(bw*.92/6.4));
+const wrap=(s,m)=>{const o=[];let c='';s.split(' ').forEach(w=>{while(w.length>m){if(c){o.push(c);c=''}o.push(w.slice(0,m-1)+'-');w=w.slice(m-1)}if((c+' '+w).trim().length<=m)c=(c+' '+w).trim();else{o.push(c);c=w}});if(c)o.push(c);return o};
+const WL=[...L.map(o=>o.n),'Subtotal'].map(x=>wrap(x,mc)),bm=18+Math.max(...WL.map(a=>a.length))*13+8,H=300+t+bm;
+let cum=0;const bars=L.map(o=>{const s=cum;cum+=o.d;return{n:o.n,lo:Math.min(s,cum),hi:Math.max(s,cum),v:o.d,e:cum,c:o.d>=0?P.up:P.dn}});
+const tot=tb-ta;bars.push({n:'Subtotal',lo:Math.min(0,tot),hi:Math.max(0,tot),v:tot,e:tot,c:P.sub});
+const mx=Math.max(1,...bars.map(x=>x.hi))*1.12,mn=Math.min(0,...bars.map(x=>x.lo))*1.12;
+const step=(()=>{const raw=(mx-mn)/5,p=Math.pow(10,Math.floor(Math.log10(raw)));return[1,2,2.5,5,10].map(k=>k*p).find(k=>k>=raw)})();
+const y=v=>t+(H-t-bm)*(1-(v-mn)/(mx-mn));
+let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="min-width:${Math.min(W,n*80)}px;width:100%;height:auto"><rect width="${W}" height="${H}" fill="${P.bg}"/>`;
+for(let v=Math.ceil(mn/step)*step;v<=mx;v+=step)s+=`<line x1="${l}" x2="${W-r}" y1="${y(v)}" y2="${y(v)}" stroke="${P.gr}"/><text x="${l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="${P.tx}">${jt(v).replace(' jt','jt')}</text>`;
+bars.forEach((b,i)=>{const x=l+i*bw+bw*.14,w=bw*.72,h=Math.max(1.5,y(b.lo)-y(b.hi));
+s+=`<rect x="${x}" y="${y(b.hi)}" width="${w}" height="${h}" fill="${b.c}"/>`;
+if(i<bars.length-1)s+=`<line x1="${x+w}" x2="${x+bw+bw*.28}" y1="${y(b.e)}" y2="${y(b.e)}" stroke="${P.tx}" stroke-opacity=".35" stroke-dasharray="3 3"/>`;
+s+=`<text x="${x+w/2}" y="${y(b.hi)-6}" text-anchor="middle" font-size="11" font-weight="600" fill="${b.c==P.sub?P.tx:b.c}">${jt(b.v)}</text>`;
+
+WL[i].forEach((ln,j)=>{s+=`<text x="${x+w/2}" y="${H-bm+18+j*13}" text-anchor="middle" font-size="11" fill="${P.tx}">${esc(ln)}</text>`})});
+return s+'</svg>'}
+
+function renderUM(){const {um,b}=VIEW,el=$('#um');
+const opts=[...new Set([...Object.values(S.cat),...Object.values(S.meta).map(m=>m.nc),...Object.values(S.man)].filter(Boolean))].sort();
+um.sort((p,q)=>q.y-p.y);
+if(!um.length){el.innerHTML='<h2>Cek produk belum berkategori</h2><div class="mu">✓ Semua produk ber-GMV sudah punya kategori.</div>';el.classList.remove('warn');return}
+el.classList.add('warn');
+const tot=um.reduce((s,o)=>s+o.y,0);
+el.innerHTML=`<h2>⚠ ${um.length} produk belum berkategori (${rp(tot)} di ${ml(b)}, tidak masuk waterfall)</h2><div class="mu" style="margin-bottom:8px">Pilih kategori untuk memasukkannya ke waterfall, lalu unduh Category List terbaru.</div><div class="sc"><table><thead><tr><th>Kode</th><th>Nama</th><th>GMV ${ml(b)}</th><th>Kategori</th></tr></thead><tbody>`+
+um.slice(0,60).map(o=>`<tr><td>${o.c}</td><td class="n" title="${esc(S.meta[o.c]?.name||'')}">${esc(S.meta[o.c]?.name||'–')}</td><td>${rp(o.y)}</td><td><select data-c="${o.c}"><option value="">Pilih…</option>${opts.map(x=>`<option>${esc(x)}</option>`).join('')}</select></td></tr>`).join('')+
+`</tbody></table></div>`+(um.length>60?`<div class="mu">Menampilkan 60 teratas dari ${um.length}.</div>`:'');
+el.querySelectorAll('select').forEach(s=>s.onchange=()=>{if(s.value){S.man[s.dataset.c]=s.value;render()}})}
+
+function save(filename,data){const csv=filename.endsWith('.csv'),b=new Blob([csv?'\ufeff'+data:data],{type:csv?'text/csv;charset=utf-8':'image/svg+xml'}),u=URL.createObjectURL(b),el=document.createElement('a');el.href=u;el.download=filename;document.body.appendChild(el);el.click();el.remove();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+function dlUI(){const box=$('#dls');if(box.dataset.ok)return;box.dataset.ok=1;
+const B=[['Chart (SVG)',()=>['waterfall_'+VIEW.b+'.svg',chartSVG(true)]],
+['Pivot (CSV)',()=>['pivot_'+VIEW.b+'.csv',toCSV([['New Category','GMV '+VIEW.a,'GMV '+VIEW.b,'GMV Change','Growth'],...VIEW.L.map(o=>[o.n,o.a,o.b,o.d,o.a?(o.d/o.a).toFixed(4):''])])]],
+['Consolidated Table bulan akhir (CSV)',()=>{const m=VIEW.b,ms=[shift(m,-2),shift(m,-1),m],mm=m.slice(5);
+const rows=[...new Set([...Object.keys(S.hist),...Object.keys(S.raw||{})])].map(c=>{const g=ms.map(x=>gm(c,x));return{c,g,t:g[0]+g[1]+g[2]}}).filter(o=>o.t>0).sort((p,q)=>q.t-p.t);
+return['Sales_Product_Category_'+MN[+mm-1]+'.csv',toCSV([['Kode Produk','Nama Produk','Category','New Category','GMV '+MN[+ms[0].slice(5)-1],'GMV '+MN[+ms[1].slice(5)-1],'Gmv '+MN[+mm-1],'Total GMV','GMV Growth','Report_Period'],
+...rows.map(o=>{const x=S.meta[o.c]||{};return[o.c,x.name||'',x.cat||'',ncOf(o.c),...o.g.map(v=>v||''),o.t,'','01/'+mm+'/'+m.slice(0,4)]})])]}],
+['Category List terbaru (CSV)',()=>['Product_Category_List.csv',toCSV([['Kode Produk','Nama Produk','Category','New Category'],...Object.keys(S.meta).filter(c=>ncOf(c)).map(c=>[c,S.meta[c].name,S.meta[c].cat,ncOf(c)])])]],
+['Database histori format ringkas (CSV)',()=>['GMV_Long_DB.csv',toCSV([['Kode Produk','Month','GMV'],...Object.keys({...S.hist,...(S.raw||{})}).flatMap(c=>allMonths().map(m=>[c,m,gm(c,m)]).filter(r=>r[2]))])]]];
+B.forEach(([t,f])=>{const bt=document.createElement('button');bt.textContent='⬇ '+t;bt.onclick=()=>{const[filename,data]=f();try{save(filename,data)}catch(e){alert('Gagal menyimpan: '+e.message)}};box.appendChild(bt)})}
+</script></body></html>
