@@ -1,0 +1,267 @@
+# SOP Penulisan Laporan Ads Performance — Haydecor
+
+**Status:** Working draft — untuk diteruskan ke agent sebagai panduan gaya bahasa
+**Sumber:** 14 laporan PDF (`Report_Archive/`, Aug 2025 – Sep 2026), kode `daily-report-automation/`, `weekly-report-automation-haydecor/`, `raw_data/`
+**Bahasa:** Indonesian (baku, gaya bisnis-iklan) + istilah Inggris yang sudah baku
+**Cakupan:** Laporan bulanan performa ads (monthly performance report). Style merujuk pada laporan PDF yang jadi *final output*.
+
+---
+
+## 0. Tujuan
+
+SOP ini dibuat supaya, saat laporan ditulis ulang oleh agent (AI/atribusi manual), hasilnya tetap:
+
+1. **Natural** — terasa seperti laporan yang diketik orang, bukan generator default.
+2. **Konsisten** — gaya sama di setiap bulan (tidak berganti-tendang).
+3. **Akurat** — angka dibumbui kalimat yang benar; tidak ada statistik pura-pura.
+4. **Mudah review** — bisa dibaca halaman per halaman, kalimat pendek.
+
+> Aturan emas: **biasanya, spesifik, dan menggunakan angka.** Kalimat yang bisa dibaca oleh telinga disebut benar, bukan yang terlihat "bagus".
+
+---
+
+## 1. Gaya Bahasa (Voice)
+
+### 1.1 Bahasa
+
+- **Bahasa Indonesia baku**, gaya laporan bisnis/keuangan.
+- Campur istilah asing baku (bukan slang, bukan typo camilan):
+
+  | Kategori | Istilah |
+  |---|---|
+  | Ukuran Iklan | ROAS, ACR (Ads Cost Ratio), SKU, CPA, CPC, CPAS, MTD, UTM, UTM Tracker |
+  | Konten | KOL, Micro KOL, UGC, Catalog Creative, Content |
+  | Funnel | Traffic, Conversion Rate, Add to Cart, Purchase, Konversi, Pembelian |
+  | Channel | Shopee Ads, Meta Reguler, Meta CPAS, TikTok Ads, Non-Ads |
+  | Produk | SKU Custom, Mirror, Magnetic Board, Cermin Digicam, Cheetah x Tiger |
+  | Kategori | Custom, Nature & Visual Art, Retro & Mirror Style, Sport, Home & Living |
+
+  Contoh kalimat: *"Shopee Ads tetap menjadi engine utama Revenue dengan ROAS yang membaik."*
+
+### 1.2 Registrer
+
+- **Laporan bisnis analitis**: faktual, langsung, profesional.
+- **Tidak hype.** Hindari kata-kata berlebihan:
+
+  | Hindari (hype) | Ganti dengan |
+  |---|---|
+  | unlock / elevate / delve | sebutkan yang terjadi, bukan yang diucapkan |
+  | leverage / empower / harness | gunakan kata kerja biasa (gunakan, perbaiki, ukur) |
+  | seamless / robust / smooth | fisikkan: "ROAS di atas benchmark", "ACR di bawah 10%" |
+  | game-changer / cutting-edge / transformative | tidak ada |
+  | synergy / journey (kecuali literal perjalanan) | kata kerja/objek spesifik |
+  | "in today's fast-paced world" / "let's explore" | tidak ada |
+  | pivotal / a testament to / plays a crucial role / "part of a broader trend" | nyatakan fakta besarnya |
+
+  Contoh: bilang *"Meta Reguler perlu evaluasi karena pertumbuhan traffic dan Add to Cart belum menghasilkan Purchase"* — bukan *"Meta Reguler membutuhkan perhatian ekstra untuk mengekslorasi potensinya."*
+
+### 1.3 Pola kalimat yang dipakai laporannya
+
+Urutkan dari **inti dulu** (konklusi → bukti → implikasi → tindakan). Contoh nyata dari laporan:
+
+- *"September mencatatkan penurunan Revenue seiring dengan pengurangan Ad Spending, namun efisiensi belum sepenuhnya terjaga karena Ad Cost Ratio melewati benchmark 10%."*
+- *"Di sisi funnel, traffic masih tumbuh tetapi jumlah pembeli menurun, sementara kontribusi Non-Ads semakin kecil."*
+- *"Dari sisi channel, Shopee Ads tetap menjadi engine utama Revenue dengan ROAS yang membaik, sedangkan Meta CPAS mempertahankan ROAS tinggi meskipun volume Purchase melemah."*
+- *"Kategori ... mencatatkan winning product (K1) tertinggi, layak menjadi fokus campaign ads."*
+- *"Shopee Ads menyumbang sekitar 79% dari total penurunan Revenue, penurunan tingkat konversi pada Shopee Ads jadi penyebab utama."*
+- *"Prioritaskan recovery SKU Winning dan pertahankan momentum produk yang sedang growth."*
+- *"Akan dilakukan pengembangan konten di angle serupa dengan variasi format lain."*
+
+**Aturan pola kalimat:**
+
+- Gunakan konektor: *seiring dengan, karena, namun, sementara, meskipun, tetapi, ditandai dengan, ditandai oleh*.
+- Gunakan **kata tetap** untuk menyampaikan kelanjutan: *tetap, tetap menjadi, tetap perlu, tetap menjadi fokus*.
+- Gunakan **verba aksi** (imperative) di bagian action plan: *Prioritaskan, Optimize, Strengthen, Recover, Perbaiki, Jaga, Scale, Evaluasi, Pertahankan, Lakukan, Lakukan pengembangan*.
+- Kalimat **pendek**. Baca sekali suara — kalau tidak kau katakan ke rekan, tulis ulang.
+- Aktif, bukan pasif: *"Penurunan terjadi..."* bukan *"Terjadi penurunan oleh..."*.
+- Spesifik: *"penurunan tingkat konversi pada Shopee Ads"* — bukan *"adanya penurunan konversi"*.
+
+### 1.4 Kata/format yang HARUS DIHINDARI (anti-AI)
+
+Terapkan checklist ini di setiap bagian. Sering muncul di laporan AI:
+
+- No generik: tidak boleh judul bagian *"Overview"*, *"Key Insights"*, *"Market Landscape"*, *"Next Steps"*.
+- No emoji (🚀, ✅, ⚠️, 🔴, 📊, 📈, 📌, 🏆) sebagai bullet di laporan PDF.
+- No "key takeaway" box, no bottom banner, no filled color bar under title, no full-height colored edge strip.
+- No "It's not just X, it's Y" / "Not only X, but Y".
+- No grup kata 3 tanpa alasan: *"fast, simple and powerful"*.
+- No crowding 5–7 bullet per section; satu ide per paragraf/bagian.
+- No angka tanpa sumber / tanpa dijelaskan.
+- No penutup bulim ("challenges and future prospects", "the road ahead", "looking forward to working with you").
+  Akhiri dengan **decision/ask** atau **action plan yang jelas**.
+
+### 1.5 Format angka
+
+| Jenis | Konvensi | Contoh |
+|---|---|---|
+| Mata uang (rupiah) | Rp + koma untuk ribuan **dan** desimal (1–2 digit setelah koma) | `Rp31,018,326` • `Rp310,270,000` |
+| ROAS | Koma desimal, 1–2 angka + satuan x | `9,32x`, `8,56x`, `12,18x` |
+| Persen / rasio / konversi | Koma desimal, 1–2 angka | `9,3%`, `4,51%`, `5,19%` |
+| Jumlah bulat tanpa satuan | Angka normal (tidak perlu Rp) | `ROAS Shopee Ads 8,39 8,76 9,26` |
+| Pemisah ribuan besar | Koma (konsisten dengan mata uang) | `31,018,326` |
+
+> Aturan pemisahan: koma dipakai **untuk ribuan** (Rp31,018,326 → 3–6 digit setelah ribuan) dan **untuk desimal** (8,56 → 2 digit). Bedakan: 3–6 digit setelah koma = ribuan; 1–2 digit = desimal. Konsisten di seluruh laporan.
+
+---
+
+## 2. Struktur Laporan Bulanan (Template)
+
+Setiap laporan mengikuti kerangka ini. Biarkan judul menjadi kalimat takeaway (bukan label).
+
+```
+1. COVER
+   • Client • Laporan • Bulan Tahun • "Confidential • Copyright ©"
+
+2. DAFTAR ISI (opsional, sekali muncul)
+   • Executive Summary • Sales Channel Performance • Best Selling Product
+   • Overall Ads Channel Performance • Discussion • Action Plan & Recommendation
+
+3. EXECUTIVE SUMMARY
+   • Judul paragraf (kepala bagian = kalimat conclusion)
+   • 2–4 poin bullet: yang terjadi → angka → penyebab → implikasi
+   • Action plan (2–4 poin) dengan verba aksi
+
+4. SECTION PER TOPIK (setiap bagian: judul kalimat → analisis → angka)
+   • Overall Sales Performance
+   • Sales Channel Performance (per channel)
+   • Best Selling Product
+   • Overall Ads Channel Performance
+   • Product & Category (ranking, proporsi, BCG matrix, increment)
+   • Ads Channel Detail (Shopee / Meta Reg / Meta CPAS / TikTok)
+   • Ads Plan / Haydecor Ads Plan
+   • Suggestion Campaign
+
+5. DISCUSSION
+   • Poin diskusi singkat (atau hubungkan ke action plan)
+
+6. ACTION PLAN & RECOMMENDATION
+   • 2–4 poin, masing-masing: aksi + kejelasan target
+
+7. CLOSING
+   • Terima kasih / signature / call-to-action
+```
+
+**Kerangka paragraf analitis (repeatable):**
+
+1. **Kepala** = kalimat conclusion: *"Revenue melemah, efisiensi ads menurun dan ketergantungan pada ads meningkat."*
+2. **Alasan 2–3 kalimat**: angka pendukung + penyebab.
+3. **Implikasi** (1 kalimat): apa artinya.
+4. **Action** (1 bulat) dengan verba aksi spesifik.
+
+---
+
+## 3. Ciri Rinci yang WAJIB Ada / TIDAK Ada
+
+### Wajib ada
+- [ ] Nama client dan bulan/tahun jelas di cover
+- [ ] Setidaknya satu angka + keterangan dalam setiap kalimat analitis
+- [ ] Channel yang "belum ada datanya" disembunyikan (TikTok Ads belum live)
+- [ ] ROAS dibulatkan 1–2 desimal + tanda ×
+- [ ] Mata uang menggunakan format Rp + koma ribuan
+- [ ] Setiap action plan punya verba aksi (Prioritaskan/Optimize/Perbaiki/Recover)
+- [ ] Pembagian silo: Product, Channel, Category jelas dipisah
+- [ ] Penutup berupa action/decision, bukan recap semesta
+
+### Tidak boleh ada
+- [ ] Label bagian generik ("Overview", "Summary", "Key Insights")
+- [ ] Emoji, icon lingkaran, atau ikon dekoratif di bullet
+- [ ] "Key takeaway"/"So what"/"Bottom line" box
+- [ ] Warna gelap penuh / strip tebal di tepi slide/deck
+- [ ] Kalimat "It's not just X, it's Y"
+- [ ] Angka tanpa konteks (tidak ada "sebagai % dari total penurunan")
+- [ ] Kalimat bohong: "meningkat sejalan dengan" padahal data berlawanan
+- [ ] Mengisi celah dengan statistik dugaan; kalau data hilang tulis `[DATA NEEDED: ...]`
+
+---
+
+## 4. Aturan Angka (Checklist Sebelum Keluar)
+
+1. Semua mata uang ditulis `Rp` + koma ribuan, contoh `Rp31,018,326`.
+2. ROAS ditulis `X,XXx` (koma desimal, satuan x).
+3. Persentase ditulis `X,X%` atau `X,XX%` (koma desimal).
+4. Pada tabel, 1 metrik per baris; judul tabel = kalimat takeaway.
+5. "Sep versus" perbandingan selalu cantumkan arah+angka, contoh: `ROAS 8,39 → 9,26 (+10%)`.
+6. Angka yang dipakai = dari data sheet, bukan dari memory.
+7. Tidak ada 2 angka berbeda untuk yang sama di laporan yang sama.
+
+---
+
+## 5. Format Data (Akibat dari konvensi kode)
+
+### 5.1 Rupiah
+`formatRupiah_(num)` → `'Rp' + Math.round(num).toLocaleString('id-ID')`
+→ hasil: `Rp31.018.326` (titik ribuan). Pada laporan PDF terlihat `Rp31,018,326`.
+**Aturan:** gunakan koma ribuan (sesuai data CSV/PDF laporan), tidak titik.
+
+### 5.2 Persentase
+`formatPercent_(num)` → `num.toFixed(1) + '%'`
+→ `9,3%`.  (koma desimal, sesuai CSV)
+
+### 5.3 ROAS
+`formatChannelRoas_(spend, revenue)` → `(revenue/spend).toFixed(1) + 'x'`
+→ `9,3x`.  (koma desimal, sesuai CSV)
+
+---
+
+## 6. Checklist Akhir (run sebelum kirim/keluar)
+
+- [ ] Tidak ada placeholder (xxx, [Detail], Series 1)
+- [ ] Tidak ada kata yang tidak jelas (no inflated significance)
+- [ ] Judgmental kata dihilangkan; sisakan fakta+angka
+- [ ] Setiap section punya judul yang berbunyi *"X ..."*
+- [ ] Kalimat dibaca sekali, terdengar alami
+- [ ] Angka konsisten dan bisa dilacak ke source sheet
+- [ ] Action plan jelas: siapa/kapan/nominal yang dilakukan
+- [ ] Penutup berupa keputusan atau permintaan, bukan "see you"
+
+---
+
+## 7. Prompt untuk Agent (copy-paste)
+
+Beri agent ini sebagai *system instruction* bila bisa dimuat:
+
+> Anda menulis laporan performa iklan harian. Ikuti SOP Haydecor berikut.
+>
+> **Gaya:**
+> - Bahasa Indonesia baku, gaya laporan bisnis-iklan. Campur istilah baku: ROAS, ACR, SKU, CPAS, UDF, KOL, UGC.
+> - Kalimat pendek, langsung, faktual. Aktif. Nama channel: "Shopee Ads", "Meta Reguler", "Meta CPAS", "TikTok Ads", "Non-Ads".
+> - Pola: inti dulu (conclusion → bukti → implikasi → action). Gunakan konektor: seiring dengan, karena, namun, sementara, meskipun, tetapi.
+> - Ajarkan "tetap/tetap menjadi/tetap perlu" untuk kelanjutan; gunakan verba aksi di action plan: Prioritaskan, Optimize, Strengthen, Recover, Perbaiki, Scale, Evaluasi.
+>
+> **Hindari:**
+> - Kata hipe: unlock, elevate, delve, leverage, empower, harness, seamless, robust, game-changer, transformative, synergy, journey.
+> - Label generik: Overview, Key Insights, Next Steps.
+> - Emoji, "key takeaway" box, banner warna penuh, strip tepi.
+> - "It's not just X, it's Y".
+> - Angka tanpa konteks; statistik dugaan.
+> - Penutup semesta ("challenges and future prospects").
+>
+> **Angka:**
+> - Rupiah: `Rp` + koma untuk ribuan dan desimal. Contoh `Rp31,018,326` (sesuai CSV `Rp310,270,000`).
+> - ROAS: `X,XXx` (koma desimal, satuan x). Contoh `9,32x`, `8,56x`.
+> - Persen: `X,X%` atau `X,XX%` (koma desimal).
+> - Koma dipakai untuk ribuan dan desimal. Bedakan: 3–6 digit setelah koma = ribuan; 1–2 digit = desimal.
+> - Konsisten di seluruh laporan.
+>
+> **Struktur:**
+> 1. Cover: client • laporan • bulan tahun • confidential.
+> 2. Executive Summary: judul paragraf conclusion + 2–4 poin + action plan.
+> 3. Section per topic: judul kalimat takeaway → analisis → angka.
+> 4. Action Plan: 2–4 verba aksi.
+> 5. Closing: terima kasih / CTA.
+>
+> **Checklist:** tanpa placeholder; tanpa kata tidak jelas; angka konsisten; akhir berupa keputusan/ask.
+
+---
+
+## 8. Referensi Laporan Contoh
+
+| Bulan | File |
+|---|---|
+| Sep 2026 | 202609_Performance_Report_Haydecor_Sep2026.pdf |
+| Oct 2025 | 202510_Performance_Report_Haydecor_Oct2025.pdf |
+| Mar 2026 | 202603_Performance_Report_Haydecor_Mar2026.pdf |
+| Dec 2025 | 202512_Performance_Report_Haydecor_Dec2025.pdf |
+| Jan 2026 | 202601_Performance_Report_Haydecor_Jan2026.pdf |
+
+Gaya bisa dibaca di laporan-laporan tersebut (14 file, Aug 2025 – Sep 2026).
