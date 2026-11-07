@@ -10,7 +10,7 @@
 Saat menyusun/revisi report Haydecor:
 1. **Feedback user terbaru dan log revisi ini** untuk keputusan gaya bahasa yang sudah dikoreksi secara eksplisit.
 2. **Report archive yang sudah final** (`Report-Archieve-MD/`) sebagai referensi utama *voice*, kedalaman analisis, struktur kalimat, dan kepadatan narasi.
-3. **SOP reporting style** (`report-style-guide/SOP.md` dan `clean.txt`) sebagai pedoman tertulis, selama tidak bertentangan dengan feedback user yang lebih baru.
+3. **SOP reporting style** (`report-style-guide/SOP.md`. `clean.txt` sudah digabung ke SOP.md dan dihapus pada 2026-11-06) sebagai pedoman tertulis, selama tidak bertentangan dengan feedback user yang lebih baru.
 4. **Draft report dan grafik/tabel sumber** sebagai dasar materi dan angka yang harus divalidasi.
 
 Revision log ini merupakan **tambahan pedoman**, bukan pengganti SOP atau izin untuk mengubah data. Jangan menganggap model/agent otomatis membacanya. **Selalu sertakan file ini dalam konteks ketika memberi tugas reporting** sampai ketentuannya diintegrasikan ke SOP/skill.
@@ -116,4 +116,4 @@ Revision log ini merupakan **tambahan pedoman**, bukan pengganti SOP atau izin u
 
 Log ini **mencatat koreksi user**, bukan menyatakan SOP utama sudah diperbaiki. Saat SOP direvisi nanti, integrasikan setiap butir di atas beserta contoh benar/salah, lalu uji kembali pada report final dari archive. Pertahankan jejak revisi ini agar agent berikutnya memahami **mengapa** aturan tersebut muncul.
 
-**Referensi:** `report-style-guide/SOP.md`, `report-style-guide/clean.txt`, `Report-Archieve-MD/`, dan pembahasan review report Haydecor Oktober 2026.
+**Referensi:** `report-style-guide/SOP.md`, `Report-Archieve-MD/`, dan pembahasan review report Haydecor Oktober 2026.

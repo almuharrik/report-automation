@@ -94,13 +94,13 @@ Terapkan checklist ini di setiap bagian. Sering muncul di laporan AI:
 
 | Jenis | Konvensi | Contoh |
 |---|---|---|
-| Mata uang (rupiah) | Rp + koma untuk ribuan **dan** desimal (1–2 digit setelah koma) | `Rp31,018,326` • `Rp310,270,000` |
-| ROAS | Koma desimal, 1–2 angka + satuan x | `9,32x`, `8,56x`, `12,18x` |
-| Persen / rasio / konversi | Koma desimal, 1–2 angka | `9,3%`, `4,51%`, `5,19%` |
-| Jumlah bulat tanpa satuan | Angka normal (tidak perlu Rp) | `ROAS Shopee Ads 8,39 8,76 9,26` |
+| Mata uang (rupiah) | Rp + koma pemisah ribuan, tanpa desimal | `Rp31,018,326` • `Rp310,270,000` |
+| ROAS | Titik desimal, 2 angka + satuan x | `9.32x`, `8.56x`, `12.18x` |
+| Persen / rasio / konversi | Titik desimal, 1–2 angka | `9.3%`, `4.51%`, `5.19%` |
+| Jumlah bulat tanpa satuan | Angka normal (tidak perlu Rp) | `Order 2,868` • `Klik 81,712` |
 | Pemisah ribuan besar | Koma (konsisten dengan mata uang) | `31,018,326` |
 
-> Aturan pemisahan: koma dipakai **untuk ribuan** (Rp31,018,326 → 3–6 digit setelah ribuan) dan **untuk desimal** (8,56 → 2 digit). Bedakan: 3–6 digit setelah koma = ribuan; 1–2 digit = desimal. Konsisten di seluruh laporan.
+> Aturan pemisahan (diputuskan 2026-11-06): **koma untuk ribuan, titik untuk desimal**. Contoh `Rp422,988,820` • `3.99%` • `8.71x`. Berlaku di narasi dan tabel, konsisten di seluruh laporan.
 
 ---
 
@@ -177,10 +177,10 @@ Setiap laporan mengikuti kerangka ini. Biarkan judul menjadi kalimat takeaway (b
 ## 4. Aturan Angka (Checklist Sebelum Keluar)
 
 1. Semua mata uang ditulis `Rp` + koma ribuan, contoh `Rp31,018,326`.
-2. ROAS ditulis `X,XXx` (koma desimal, satuan x).
-3. Persentase ditulis `X,X%` atau `X,XX%` (koma desimal).
+2. ROAS ditulis `X.XXx` (titik desimal, satuan x).
+3. Persentase ditulis `X.X%` atau `X.XX%` (titik desimal). Selisih antar-rate ditulis dalam pp, contoh `ACR naik 0.86 pp`.
 4. Pada tabel, 1 metrik per baris; judul tabel = kalimat takeaway.
-5. "Sep versus" perbandingan selalu cantumkan arah+angka, contoh: `ROAS 8,39 → 9,26 (+10%)`.
+5. "Sep versus" perbandingan selalu cantumkan arah+angka, contoh: `ROAS 8.39 → 9.26 (+10%)`.
 6. Angka yang dipakai = dari data sheet, bukan dari memory.
 7. Tidak ada 2 angka berbeda untuk yang sama di laporan yang sama.
 
@@ -195,11 +195,11 @@ Setiap laporan mengikuti kerangka ini. Biarkan judul menjadi kalimat takeaway (b
 
 ### 5.2 Persentase
 `formatPercent_(num)` → `num.toFixed(1) + '%'`
-→ `9,3%`.  (koma desimal, sesuai CSV)
+→ `9.3%` (titik desimal).
 
 ### 5.3 ROAS
 `formatChannelRoas_(spend, revenue)` → `(revenue/spend).toFixed(1) + 'x'`
-→ `9,3x`.  (koma desimal, sesuai CSV)
+→ `9.3x` (titik desimal).
 
 ---
 
@@ -237,10 +237,10 @@ Beri agent ini sebagai *system instruction* bila bisa dimuat:
 > - Penutup semesta ("challenges and future prospects").
 >
 > **Angka:**
-> - Rupiah: `Rp` + koma untuk ribuan dan desimal. Contoh `Rp31,018,326` (sesuai CSV `Rp310,270,000`).
-> - ROAS: `X,XXx` (koma desimal, satuan x). Contoh `9,32x`, `8,56x`.
-> - Persen: `X,X%` atau `X,XX%` (koma desimal).
-> - Koma dipakai untuk ribuan dan desimal. Bedakan: 3–6 digit setelah koma = ribuan; 1–2 digit = desimal.
+> - Rupiah: `Rp` + koma pemisah ribuan. Contoh `Rp31,018,326` (sesuai CSV `Rp310,270,000`).
+> - ROAS: `X.XXx` (titik desimal, satuan x). Contoh `9.32x`, `8.56x`.
+> - Persen: `X.X%` atau `X.XX%` (titik desimal).
+> - Koma hanya untuk ribuan, titik hanya untuk desimal.
 > - Konsisten di seluruh laporan.
 >
 > **Struktur:**
